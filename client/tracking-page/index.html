@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GoldenLine — Track Your Case</title>
+  <link rel="icon" href="data:," />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="../theme.css" />
+  <style>
+    html, body { margin: 0; min-height: 100%; background: var(--gl-deep); color: var(--gl-ink);
+      font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Noto Sans", sans-serif; }
+    .gl-bg { position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 900px 500px at 50% -10%, rgba(45,66,130,.35), transparent 60%),
+        linear-gradient(165deg, var(--gl-deep) 0%, var(--gl-mid) 60%, var(--gl-navy) 100%); }
+  </style>
+</head>
+<body class="antialiased" x-data="trackingApp()" x-init="init()" x-cloak>
+  <div class="gl-bg" aria-hidden="true"></div>
+
+  <div class="relative z-10 max-w-md mx-auto px-4 py-8 space-y-4">
+    <div class="flex items-center gap-2">
+      <span class="text-lg gl-glow-pulse leading-none" style="color:var(--gl-gold)">◆</span>
+      <span class="font-semibold text-white">GoldenLine</span>
+      <span class="text-sm" style="color:var(--gl-ink-dim)">Case Tracking</span>
+    </div>
+
+    <template x-if="state === 'loading'">
+      <div class="gl-card p-6 flex items-center gap-2 text-sm" style="color:var(--gl-ink-dim)">
+        <div class="w-4 h-4 rounded-full border-2" style="border-color:var(--gl-gold); border-right-color:transparent; animation:spin .7s linear infinite"></div>
+        Loading…
+      </div>
+    </template>
+
+    <template x-if="state === 'notfound'">
+      <div class="gl-card p-6 text-sm">
+        <p style="color:var(--gl-ink)">This tracking link isn't valid.</p>
+        <p class="mt-1" style="color:var(--gl-ink-faint)">Double-check the link from the SMS, or ask the ambulance helper for it again.</p>
+      </div>
+    </template>
+
+    <template x-if="state === 'expired'">
+      <div class="gl-card p-6 text-sm" style="border-color:rgba(245,158,11,.35)">
+        <p style="color:#fcd34d">This link has expired.</p>
+        <p class="mt-1" style="color:var(--gl-ink-faint)">Tracking links stay active for a day or two after a case closes.</p>
+      </div>
+    </template>
+
+    <template x-if="state === 'error'">
+      <div class="gl-card p-6 text-sm">
+        <p style="color:var(--gl-ink)">Couldn't reach the server. This page will keep trying.</p>
+      </div>
+    </template>
+
+    <template x-if="state === 'active' && view">
+      <div class="space-y-4">
+        <div class="gl-card p-4 flex items-center justify-between">
+          <span class="text-sm" style="color:var(--gl-ink-dim)">Status</span>
+          <span class="gl-badge" :class="stageBadgeClass(view.stage)" x-text="stageLabel(view.stage)"></span>
+        </div>
+
+        <template x-if="view.hospital">
+          <div class="gl-card p-4 text-sm space-y-1.5">
+            <div class="text-xs uppercase tracking-wide" style="color:var(--gl-gold-soft)">Hospital</div>
+            <div class="text-lg font-semibold text-white" x-text="view.hospital.name"></div>
+            <div style="color:var(--gl-ink-dim)" x-text="view.hospital.why_chosen"></div>
+          </div>
+        </template>
+        <template x-if="!view.hospital">
+          <div class="gl-card p-4 text-sm" style="color:var(--gl-ink-faint)">
+            A hospital hasn't been chosen for this case yet.
+          </div>
+        </template>
+
+        <template x-if="view.eta">
+          <div class="gl-card p-4 text-sm">
+            <div class="text-xs uppercase tracking-wide mb-1" style="color:var(--gl-gold-soft)">Estimated arrival</div>
+            <div class="text-2xl font-semibold gl-stat-value" x-text="view.eta.min_minutes + '–' + view.eta.max_minutes + ' min'"></div>
+            <div class="text-xs mt-1" style="color:var(--gl-ink-faint)">A range, not a countdown — traffic varies.</div>
+          </div>
+        </template>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="gl-card p-3 text-sm">
+            <div style="color:var(--gl-ink-faint)" class="text-xs mb-1">Bed</div>
+            <span class="gl-badge" :class="view.bed_lock_status === 'confirmed' ? 'gl-badge-emerald' : 'gl-badge-slate'"
+              x-text="view.bed_lock_status === 'confirmed' ? 'Reserved' : 'Not yet'"></span>
+          </div>
+          <div class="gl-card p-3 text-sm">
+            <div style="color:var(--gl-ink-faint)" class="text-xs mb-1">Check-in</div>
+            <span class="gl-badge" :class="view.qr_handoff_status === 'confirmed' ? 'gl-badge-emerald' : 'gl-badge-slate'"
+              x-text="view.qr_handoff_status === 'confirmed' ? 'Arrived' : 'Not yet'"></span>
+          </div>
+        </div>
+
+        <div class="gl-card p-4 text-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs uppercase tracking-wide" style="color:var(--gl-gold-soft)">Hospital preparation</span>
+            <span style="color:var(--gl-ink-faint)" x-text="view.prep_status.confirmed + ' / ' + view.prep_status.total"></span>
+          </div>
+          <ul class="space-y-1">
+            <template x-for="u in view.prep_status.updates" :key="u.item">
+              <li class="flex items-center gap-1.5">
+                <span x-text="u.status === 'confirmed' ? '✓' : '◻'" :style="u.status === 'confirmed' ? 'color:var(--gl-gold-soft)' : 'color:var(--gl-ink-faint)'"></span>
+                <span style="color:var(--gl-ink)" x-text="u.item"></span>
+              </li>
+            </template>
+            <li x-show="!view.prep_status.updates.length" style="color:var(--gl-ink-faint)">Nothing to prepare yet.</li>
+          </ul>
+        </div>
+
+        <p class="text-xs text-center" style="color:var(--gl-ink-faint)">
+          This page updates itself automatically. No login needed — keep this link private.
+        </p>
+      </div>
+    </template>
+  </div>
+
+  <script src="tracking.js"></script>
+</body>
+</html>

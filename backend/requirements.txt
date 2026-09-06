@@ -1,0 +1,14 @@
+# Real-Time Emergency Capacity Coordination Platform - backend deps
+# Install with:  pip install -r requirements.txt
+
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0
+alembic>=1.13
+pydantic-settings>=2.4
+python-dotenv>=1.0
+httpx>=0.27          # FR-4: real Google Maps Directions API call
+python-multipart>=0.0.9  # FR-22: CSV file upload (FastAPI's UploadFile)
+
+# --- Optional: uncomment when switching local dev from SQLite to PostgreSQL ---
+# psycopg[binary]>=3.2

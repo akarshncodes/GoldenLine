@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hospital / Blood-Bank Dashboard — Placeholder</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 40rem; padding: 0 1rem; }
+    code { background: #f0f0f0; padding: 0.1rem 0.3rem; border-radius: 3px; }
+    .status { margin-top: 1rem; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Hospital / Blood-Bank Dashboard</h1>
+  <p><strong>Phase 0 placeholder.</strong> Real screens (capacity management, case queue) come in later phases.</p>
+  <p>API base: <code>http://localhost:8000</code></p>
+  <button id="ping">Check API health</button>
+  <div class="status" id="status">—</div>
+
+  <script>
+    document.getElementById('ping').addEventListener('click', async () => {
+      const el = document.getElementById('status');
+      el.textContent = 'checking…';
+      try {
+        const res = await fetch('http://localhost:8000/health');
+        const data = await res.json();
+        el.textContent = `${res.status} — status: ${data.status}, database: ${data.database}`;
+      } catch (err) {
+        el.textContent = 'API unreachable: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>

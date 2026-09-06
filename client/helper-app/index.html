@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="app.title">GoldenLine Helper</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="../theme.css" />
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+<body>
+  <div class="gl-app-bg" aria-hidden="true"></div>
+  <header>
+    <div class="brand-row">
+      <span class="brand-mark" aria-hidden="true">◆</span>
+      <h1 data-i18n="app.title">GoldenLine Helper</h1>
+    </div>
+    <p class="tagline" data-i18n="app.tagline"></p>
+    <span id="loc-chip" class="chip" data-estimated="false" data-i18n-aria-label="loc.live">◉ …</span>
+  </header>
+
+  <div id="conn-bar" data-state="online">● Online</div>
+
+  <nav>
+    <button data-screen="new-case" data-i18n="nav.newCase" class="active"></button>
+    <button data-screen="symptoms" data-i18n="nav.symptoms"></button>
+    <button data-screen="hospital" data-i18n="nav.hospital"></button>
+    <button data-screen="route" data-i18n="nav.route"></button>
+    <button data-screen="settings" data-i18n="nav.settings"></button>
+  </nav>
+
+  <main id="view"><!-- rendered by app.js --></main>
+
+  <footer>
+    <small>API: <code>http://localhost:8000</code> · FR-13 offline-first · FR-14 i18n (en/hi/ta/bn) · FR-15 safe-driving</small>
+  </footer>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

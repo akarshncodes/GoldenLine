@@ -1,0 +1,93 @@
+/* GoldenLine — sign-in page styling.
+ * Shared tokens/components live in theme.css (loaded first); this file is
+ * just the hero scene animation and a couple of login-only bits. */
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--gl-deep);
+  color: var(--gl-ink);
+  font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari",
+    "Noto Sans Tamil", "Noto Sans Bengali", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* ─────────────────────────── animated background scene ─────────────────── */
+.gl-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(45, 66, 130, 0.55), transparent 60%),
+    radial-gradient(ellipse 900px 600px at 90% 110%, rgba(45, 66, 130, 0.45), transparent 60%),
+    linear-gradient(160deg, var(--gl-deep) 0%, var(--gl-mid) 55%, var(--gl-navy) 100%);
+}
+
+.gl-scene svg.gl-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.gl-path {
+  fill: none;
+  stroke: var(--gl-gold);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 7px rgba(242, 193, 78, 0.65));
+  stroke-dasharray: 14 12;
+  animation: gl-dash 6s linear infinite;
+}
+.gl-path.gl-path-2 {
+  stroke-width: 1.1;
+  opacity: 0.55;
+  animation-duration: 9s;
+  animation-direction: reverse;
+}
+.gl-path.gl-path-3 {
+  stroke-width: 0.9;
+  opacity: 0.35;
+  animation-duration: 13s;
+}
+@keyframes gl-dash {
+  to { stroke-dashoffset: -260; }
+}
+
+/* soft drifting particles (heartbeats of the network) */
+.gl-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 193, 78, 0.65), rgba(242, 193, 78, 0) 70%);
+  filter: blur(0.5px);
+  animation: gl-drift-y var(--gl-dur-y, 16s) ease-in-out infinite,
+             gl-drift-x var(--gl-dur-x, 20s) ease-in-out infinite;
+  animation-delay: var(--gl-delay, 0s);
+}
+@keyframes gl-drift-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-46px); }
+}
+@keyframes gl-drift-x {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(34px); }
+}
+
+.gl-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 45%, transparent 40%, rgba(7, 11, 22, 0.55) 100%);
+  pointer-events: none;
+}
+
+/* ─────────────────────────── sign-in tabs ─────────────────────────── */
+.gl-tab {
+  color: var(--gl-ink-dim);
+  border-bottom: 2px solid transparent;
+}
+.gl-tab.gl-tab-active {
+  color: var(--gl-gold-soft);
+  border-bottom-color: var(--gl-gold);
+}

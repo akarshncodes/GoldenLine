@@ -1,0 +1,12 @@
+{
+  "note": "FR-13 item 4: a small pre-downloaded snapshot of the mock hospital dataset, bundled with the app so a basic list is available with zero network. hospital-cache.js refreshes this from GET /hospitals when online.",
+  "captured_at": "2026-09-05T00:00:00Z",
+  "hospitals": [
+    { "hospital_id": "HOSP-001", "name": "Government Medical College & Hospital, Dindigul", "cost_tier": "Government-Low", "rating": 3.9, "distance_km": 3.2, "eta_minutes": 11, "live_bed_count": 130, "live_icu_count": 28, "specialties": ["emergency", "cardiology", "pulmonology", "neurology", "general_medicine", "trauma_surgery", "obstetrics", "burns_unit"] },
+    { "hospital_id": "HOSP-004", "name": "Sankara Hospital", "cost_tier": "Private-Premium", "rating": 4.2, "distance_km": 3.8, "eta_minutes": 12, "live_bed_count": 70, "live_icu_count": 12, "specialties": ["emergency", "cardiology", "general_medicine", "neurology"] },
+    { "hospital_id": "HOSP-005", "name": "K.T. Super Speciality Hospitals", "cost_tier": "Private-Premium", "rating": 4.3, "distance_km": 2.9, "eta_minutes": 10, "live_bed_count": 80, "live_icu_count": 15, "specialties": ["emergency", "cardiology", "neurology", "general_medicine", "trauma_surgery", "pulmonology"] },
+    { "hospital_id": "HOSP-007", "name": "Shifa Multi Speciality Hospital", "cost_tier": "Private-Standard", "rating": 3.9, "distance_km": 1.8, "eta_minutes": 7, "live_bed_count": 55, "live_icu_count": 8, "specialties": ["emergency", "general_medicine", "trauma_surgery", "obstetrics"] },
+    { "hospital_id": "HOSP-008", "name": "JJ Arul Hospital", "cost_tier": "Private-Standard", "rating": 3.7, "distance_km": 5.5, "eta_minutes": 16, "live_bed_count": 45, "live_icu_count": 6, "specialties": ["emergency", "general_medicine", "trauma_surgery"] },
+    { "hospital_id": "HOSP-009", "name": "City Hospital", "cost_tier": "Private-Standard", "rating": 3.8, "distance_km": 2.6, "eta_minutes": 9, "live_bed_count": 50, "live_icu_count": 7, "specialties": ["emergency", "general_medicine", "obstetrics", "pulmonology", "cardiology"] }
+  ]
+}

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GoldenLine — Sign In</title>
+  <meta name="description" content="GoldenLine — real-time emergency capacity coordination. Sign in to your account." />
+  <link rel="icon" href="data:," />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body x-data="loginApp()" x-init="init()" x-cloak>
+
+  <!-- ═══════════════════════ animated background scene ═══════════════════════ -->
+  <div class="gl-scene" aria-hidden="true">
+    <svg class="gl-lines" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <path class="gl-path"
+        d="M -50,620 C 200,520 350,700 600,560 S 1000,420 1250,540 S 1500,600 1550,520" />
+      <path class="gl-path gl-path-2"
+        d="M -50,300 C 250,220 400,380 700,300 S 1050,180 1300,300 S 1500,340 1550,260" />
+      <path class="gl-path gl-path-3"
+        d="M -50,760 C 300,700 500,820 800,740 S 1150,660 1400,740 S 1520,760 1550,720" />
+    </svg>
+    <template x-for="i in 18" :key="'p' + i">
+      <span class="gl-particle" :style="particleStyle(i)"></span>
+    </template>
+    <div class="gl-vignette"></div>
+  </div>
+
+  <!-- ═══════════════════════════════ top bar ═══════════════════════════════ -->
+  <header class="relative z-10 flex items-center justify-between px-5 sm:px-8 py-5">
+    <div class="flex items-center gap-2 text-white font-semibold tracking-wide gl-fade-up">
+      <span class="text-2xl gl-glow-pulse leading-none" style="color:var(--gl-gold)">◆</span>
+      <span class="text-lg" x-text="t('brand.name')"></span>
+    </div>
+    <div class="flex items-center gap-3 sm:gap-4">
+      <div class="hidden sm:flex items-center gap-1.5 text-xs" :class="apiUp ? 'text-emerald-300' : 'text-rose-300'">
+        <span class="w-1.5 h-1.5 rounded-full" :class="apiUp ? 'bg-emerald-400' : 'bg-rose-400'"></span>
+        <span x-text="apiUp ? t('footer.status.online') : t('footer.status.offline')"></span>
+      </div>
+      <select x-model="lang" @change="setLang($event.target.value)"
+        class="bg-white/10 text-white text-sm rounded-md px-2 py-1.5 border border-white/15 backdrop-blur"
+        :aria-label="t('lang.label')">
+        <template x-for="o in langOptions" :key="o.code">
+          <option :value="o.code" x-text="o.label" class="text-slate-800"></option>
+        </template>
+      </select>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════ hero + login card ═══════════════════════════ -->
+  <main class="relative z-10 flex flex-col items-center px-5 pb-16 min-h-[85vh] justify-center sm:justify-start sm:pt-6">
+
+    <div class="max-w-2xl text-center mt-2 sm:mt-6 gl-fade-up" style="animation-delay:.05s">
+      <h1 class="text-3xl sm:text-[2.6rem] font-bold text-white leading-tight tracking-tight" x-text="t('hero.headline')"></h1>
+      <p class="mt-3 text-sm sm:text-base max-w-xl mx-auto" style="color:var(--gl-ink-dim)" x-text="t('hero.subheadline')"></p>
+    </div>
+
+    <!-- ─────────────────────────── THE login card ─────────────────────────── -->
+    <div class="gl-card w-full max-w-md mt-7 sm:mt-8 p-6 sm:p-8 gl-fade-up" style="animation-delay:.15s">
+
+      <div x-show="checkingSession" class="py-10 text-center text-sm" style="color:var(--gl-ink-dim)">
+        <div class="mx-auto w-6 h-6 border-2 rounded-full animate-spin" style="border-color:var(--gl-gold) transparent var(--gl-gold) var(--gl-gold)"></div>
+      </div>
+
+      <div x-show="!checkingSession">
+        <div class="text-center mb-5">
+          <div class="text-white font-bold text-xl" x-text="t('brand.name')"></div>
+          <div class="text-xs mt-1" style="color:var(--gl-ink-dim)" x-text="t('brand.tagline')"></div>
+        </div>
+
+        <!-- ── sign-in tabs (hidden while the forgot-password flow is open) ── -->
+        <template x-if="!forgotOpen">
+          <div>
+            <div class="flex border-b border-white/10 mb-5 text-sm font-medium">
+              <button type="button" class="gl-tab px-3 py-2" :class="tab === 'staff' && 'gl-tab-active'"
+                @click="tab = 'staff'" x-text="t('auth.tabStaff')"></button>
+              <button type="button" class="gl-tab px-3 py-2" :class="tab === 'family' && 'gl-tab-active'"
+                @click="tab = 'family'" x-text="t('auth.tabFamily')"></button>
+            </div>
+
+            <!-- staff login -->
+            <template x-if="tab === 'staff'">
+              <form @submit.prevent="signInStaff()" class="space-y-3">
+                <p class="text-xs" style="color:var(--gl-ink-dim)" x-text="t('auth.staffIntro')"></p>
+                <div>
+                  <label class="block text-xs mb-1" style="color:var(--gl-ink-dim)" x-text="t('auth.accountId')"></label>
+                  <input x-model="staff.id" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm" autocomplete="username" />
+                </div>
+                <div>
+                  <label class="block text-xs mb-1" style="color:var(--gl-ink-dim)" x-text="t('auth.password')"></label>
+                  <input x-model="staff.pw" type="password" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm" autocomplete="current-password" />
+                </div>
+                <p x-show="staff.error" x-text="staff.error" class="text-xs text-rose-300"></p>
+                <button type="submit" :disabled="staff.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm">
+                  <span x-text="staff.loading ? t('auth.signingIn') : t('auth.signIn')"></span>
+                </button>
+                <button type="button" @click="openForgot()" class="gl-link text-xs block mx-auto pt-1" x-text="t('auth.forgotPassword')"></button>
+              </form>
+            </template>
+
+            <!-- family / OTP -->
+            <template x-if="tab === 'family'">
+              <div>
+                <template x-if="!family.otpId">
+                  <form @submit.prevent="sendFamilyOtp()" class="space-y-3">
+                    <p class="text-xs" style="color:var(--gl-ink-dim)" x-text="t('auth.familyIntro')"></p>
+                    <input x-model="family.phone" required inputmode="numeric" maxlength="10"
+                      class="gl-input w-full rounded-lg px-3 py-2.5 text-sm" :placeholder="t('auth.phoneNumber')" />
+                    <p x-show="family.error" x-text="family.error" class="text-xs text-rose-300"></p>
+                    <button type="submit" :disabled="family.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm" x-text="t('auth.sendCode')"></button>
+                  </form>
+                </template>
+                <template x-if="family.otpId">
+                  <form @submit.prevent="verifyFamilyOtp()" class="space-y-3">
+                    <p class="text-xs" style="color:var(--gl-ink-dim)">
+                      <span x-text="t('auth.otpSentTo')"></span> <span class="text-white" x-text="family.sentTo"></span>
+                    </p>
+                    <p x-show="family.devCode" class="text-xs rounded-md px-2.5 py-2" style="background:rgba(242,193,78,.12); color:var(--gl-gold-soft)">
+                      <span x-text="t('auth.devCodeNote')"></span> <strong x-text="family.devCode"></strong>
+                    </p>
+                    <input x-model="family.code" required inputmode="numeric" maxlength="6"
+                      class="gl-input w-full rounded-lg px-3 py-2.5 text-sm tracking-[0.3em] text-center" :placeholder="t('auth.otpCode')" />
+                    <p x-show="family.error" x-text="family.error" class="text-xs text-rose-300"></p>
+                    <button type="submit" :disabled="family.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm" x-text="t('auth.verifyContinue')"></button>
+                    <button type="button" @click="sendFamilyOtp()" class="gl-link text-xs block mx-auto pt-1" x-text="t('auth.resendCode')"></button>
+                  </form>
+                </template>
+              </div>
+            </template>
+
+            <!-- quick demo accounts (judges / reviewers) -->
+            <div class="mt-6 pt-4 border-t border-white/10">
+              <p class="text-[11px] text-center mb-2" style="color:var(--gl-ink-dim)" x-text="t('auth.demoAccounts')"></p>
+              <div class="flex flex-wrap gap-1.5 justify-center">
+                <template x-for="a in demoAccounts" :key="a.id">
+                  <button type="button" @click="pickDemo(a)" class="gl-chip text-[11px] rounded-full px-2.5 py-1"
+                    x-text="t('role.' + a.roleKey)"></button>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- ── forgot password ── -->
+        <template x-if="forgotOpen">
+          <div>
+            <button type="button" @click="closeForgot()" class="gl-link text-xs mb-3 block" x-text="t('auth.backToSignIn')"></button>
+            <h2 class="text-white font-semibold mb-3" x-text="t('forgot.title')"></h2>
+
+            <template x-if="forgotStep === 1">
+              <form @submit.prevent="requestReset()" class="space-y-3">
+                <p class="text-xs" style="color:var(--gl-ink-dim)" x-text="t('forgot.step1Intro')"></p>
+                <input x-model="forgot.id" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm" :placeholder="t('auth.accountId')" />
+                <p x-show="forgot.error" x-text="forgot.error" class="text-xs text-rose-300"></p>
+                <button type="submit" :disabled="forgot.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm" x-text="t('forgot.sendCode')"></button>
+              </form>
+            </template>
+
+            <template x-if="forgotStep === 2">
+              <form @submit.prevent="submitReset()" class="space-y-3">
+                <p class="text-xs" style="color:var(--gl-ink-dim)" x-text="t('forgot.step2Intro')"></p>
+                <p x-show="forgot.devCode" class="text-xs rounded-md px-2.5 py-2" style="background:rgba(242,193,78,.12); color:var(--gl-gold-soft)">
+                  <span x-text="t('auth.devCodeNote')"></span> <strong x-text="forgot.devCode"></strong>
+                </p>
+                <input x-model="forgot.code" required inputmode="numeric" maxlength="6"
+                  class="gl-input w-full rounded-lg px-3 py-2.5 text-sm tracking-[0.3em] text-center" :placeholder="t('auth.otpCode')" />
+                <input x-model="forgot.newPw" type="password" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm"
+                  :placeholder="t('forgot.newPassword')" autocomplete="new-password" />
+                <input x-model="forgot.confirmPw" type="password" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm"
+                  :placeholder="t('forgot.confirmPassword')" autocomplete="new-password" />
+                <p x-show="forgot.error" x-text="forgot.error" class="text-xs text-rose-300"></p>
+                <button type="submit" :disabled="forgot.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm" x-text="t('forgot.resetButton')"></button>
+              </form>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────── feature strip ─────────────────────────── -->
+    <div class="gl-hide-mobile mt-10 grid sm:grid-cols-3 gap-4 max-w-4xl w-full gl-fade-up" style="animation-delay:.3s">
+      <div class="gl-card p-4">
+        <div class="text-sm font-semibold" style="color:var(--gl-gold-soft)" x-text="t('hero.feature1.title')"></div>
+        <div class="text-xs mt-1.5 leading-relaxed" style="color:var(--gl-ink-dim)" x-text="t('hero.feature1.body')"></div>
+      </div>
+      <div class="gl-card p-4">
+        <div class="text-sm font-semibold" style="color:var(--gl-gold-soft)" x-text="t('hero.feature2.title')"></div>
+        <div class="text-xs mt-1.5 leading-relaxed" style="color:var(--gl-ink-dim)" x-text="t('hero.feature2.body')"></div>
+      </div>
+      <div class="gl-card p-4">
+        <div class="text-sm font-semibold" style="color:var(--gl-gold-soft)" x-text="t('hero.feature3.title')"></div>
+        <div class="text-xs mt-1.5 leading-relaxed" style="color:var(--gl-ink-dim)" x-text="t('hero.feature3.body')"></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────── stat strip ─────────────────────────── -->
+    <div class="gl-hide-mobile mt-8 flex gap-10 sm:gap-16 gl-fade-up" style="animation-delay:.4s">
+      <div class="text-center">
+        <div class="text-2xl font-bold gl-stat-value" x-text="t('hero.stat1.value')"></div>
+        <div class="text-[11px] mt-1 max-w-[9rem]" style="color:var(--gl-ink-dim)" x-text="t('hero.stat1.label')"></div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold gl-stat-value" x-text="t('hero.stat2.value')"></div>
+        <div class="text-[11px] mt-1 max-w-[9rem]" style="color:var(--gl-ink-dim)" x-text="t('hero.stat2.label')"></div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold gl-stat-value" x-text="t('hero.stat3.value')"></div>
+        <div class="text-[11px] mt-1 max-w-[9rem]" style="color:var(--gl-ink-dim)" x-text="t('hero.stat3.label')"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="relative z-10 text-center pb-6 px-4 text-[11px]" style="color:var(--gl-ink-dim)">
+    <span x-text="t('brand.tagline')"></span> · <span x-text="t('footer.tag')"></span>
+  </footer>
+
+  <script src="login.js"></script>
+</body>
+</html>
