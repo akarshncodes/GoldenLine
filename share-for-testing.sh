@@ -25,7 +25,7 @@ PID_FILE="$STATE_DIR/pids"
 BACKEND_LOG="$STATE_DIR/tunnel-backend.log"
 CLIENT_LOG="$STATE_DIR/tunnel-client.log"
 
-API_FILES=("$CLIENT_DIR/console/console.js" "$CLIENT_DIR/login.js" "$CLIENT_DIR/tracking-page/tracking.js")
+API_FILES=("$CLIENT_DIR/console/console.js" "$CLIENT_DIR/login.js" "$CLIENT_DIR/landing.js" "$CLIENT_DIR/tracking-page/tracking.js")
 OLD_API="http://localhost:8000"
 
 require_cloudflared() {

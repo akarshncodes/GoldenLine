@@ -114,7 +114,8 @@ def select_hospital_by_helper(
 ) -> tuple[Case, BedLock]:
     """Both paths: the helper taps one of the 3 cost-class hospitals shown for
     this case, after asking the family which class they'd like — never the
-    family, never auto-selected, and never any hospital outside those 3 picks.
+    family directly, never auto-selected, and never any hospital outside those
+    3 picks.
     """
     if case.selected_hospital_id is not None:
         raise HospitalAlreadySelected()

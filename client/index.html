@@ -3,220 +3,268 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GoldenLine — Sign In</title>
-  <meta name="description" content="GoldenLine — real-time emergency capacity coordination. Sign in to your account." />
+  <title>GoldenLine — Every second counts. So does every bed.</title>
+  <meta name="description" content="GoldenLine connects families, ambulances, hospitals and blood banks into one real-time network — so critical patients reach the right bed inside the golden hour." />
   <link rel="icon" href="data:," />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="theme.css" />
-  <link rel="stylesheet" href="login.css" />
+  <link rel="stylesheet" href="landing.css" />
 </head>
-<body x-data="loginApp()" x-init="init()" x-cloak>
+<body>
 
-  <!-- ═══════════════════════ animated background scene ═══════════════════════ -->
-  <div class="gl-scene" aria-hidden="true">
-    <svg class="gl-lines" viewBox="0 0 1440 900" preserveAspectRatio="none">
-      <path class="gl-path"
-        d="M -50,620 C 200,520 350,700 600,560 S 1000,420 1250,540 S 1500,600 1550,520" />
-      <path class="gl-path gl-path-2"
-        d="M -50,300 C 250,220 400,380 700,300 S 1050,180 1300,300 S 1500,340 1550,260" />
-      <path class="gl-path gl-path-3"
-        d="M -50,760 C 300,700 500,820 800,740 S 1150,660 1400,740 S 1520,760 1550,720" />
+  <div class="gl-landing-scene" aria-hidden="true">
+    <div class="gl-scene-grid"></div>
+    <div class="gl-scene-glow gl-scene-glow-a"></div>
+    <div class="gl-scene-glow gl-scene-glow-b"></div>
+    <svg class="gl-scene-lines" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <path d="M -60,640 C 240,520 420,760 720,600 S 1180,440 1500,560" />
+      <path d="M -60,300 C 260,220 460,420 760,320 S 1160,180 1500,320" />
     </svg>
-    <template x-for="i in 18" :key="'p' + i">
-      <span class="gl-particle" :style="particleStyle(i)"></span>
-    </template>
-    <div class="gl-vignette"></div>
   </div>
 
-  <!-- ═══════════════════════════════ top bar ═══════════════════════════════ -->
-  <header class="relative z-10 flex items-center justify-between px-5 sm:px-8 py-5">
-    <div class="flex items-center gap-2 text-white font-semibold tracking-wide gl-fade-up">
-      <span class="text-2xl gl-glow-pulse leading-none" style="color:var(--gl-gold)">◆</span>
-      <span class="text-lg" x-text="t('brand.name')"></span>
-    </div>
-    <div class="flex items-center gap-3 sm:gap-4">
-      <div class="hidden sm:flex items-center gap-1.5 text-xs" :class="apiUp ? 'text-emerald-300' : 'text-rose-300'">
-        <span class="w-1.5 h-1.5 rounded-full" :class="apiUp ? 'bg-emerald-400' : 'bg-rose-400'"></span>
-        <span x-text="apiUp ? t('footer.status.online') : t('footer.status.offline')"></span>
-      </div>
-      <select x-model="lang" @change="setLang($event.target.value)"
-        class="bg-white/10 text-white text-sm rounded-md px-2 py-1.5 border border-white/15 backdrop-blur"
-        :aria-label="t('lang.label')">
-        <template x-for="o in langOptions" :key="o.code">
-          <option :value="o.code" x-text="o.label" class="text-slate-800"></option>
-        </template>
-      </select>
+  <!-- ─────────────────────────────── nav ─────────────────────────────── -->
+  <header id="nav" class="gl-landing-nav">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center gap-6">
+      <a href="#top" class="flex items-center gap-2.5 font-semibold tracking-tight text-white shrink-0">
+        <span class="gl-brand-mark text-sm">G</span>
+        <span>GoldenLine</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-sm ml-4" style="color:var(--gl-ink-dim)">
+        <a href="#solution" class="hover:text-white transition">The network</a>
+        <a href="#roadmap" class="hover:text-white transition">How it works</a>
+        <a href="#numbers" class="hover:text-white transition">Why it holds</a>
+        <a href="#faq" class="hover:text-white transition">FAQ</a>
+      </nav>
+      <a id="navCta" href="login.html" class="gl-btn-primary text-sm rounded-lg px-4 py-2 ml-auto">Sign in</a>
     </div>
   </header>
 
-  <!-- ═══════════════════════════ hero + login card ═══════════════════════════ -->
-  <main class="relative z-10 flex flex-col items-center px-5 pb-16 min-h-[85vh] justify-center sm:justify-start sm:pt-6">
+  <main id="top">
 
-    <div class="max-w-2xl text-center mt-2 sm:mt-6 gl-fade-up" style="animation-delay:.05s">
-      <h1 class="text-3xl sm:text-[2.6rem] font-bold text-white leading-tight tracking-tight" x-text="t('hero.headline')"></h1>
-      <p class="mt-3 text-sm sm:text-base max-w-xl mx-auto" style="color:var(--gl-ink-dim)" x-text="t('hero.subheadline')"></p>
-    </div>
-
-    <!-- ─────────────────────────── THE login card ─────────────────────────── -->
-    <div class="gl-card w-full max-w-md mt-7 sm:mt-8 p-6 sm:p-8 gl-fade-up" style="animation-delay:.15s">
-
-      <div x-show="checkingSession" class="py-10 text-center text-sm" style="color:var(--gl-ink-dim)">
-        <div class="mx-auto w-6 h-6 border-2 rounded-full animate-spin" style="border-color:var(--gl-gold) transparent var(--gl-gold) var(--gl-gold)"></div>
-      </div>
-
-      <div x-show="!checkingSession">
-        <div class="text-center mb-5">
-          <div class="text-white font-bold text-xl" x-text="t('brand.name')"></div>
-          <div class="text-xs mt-1" style="color:var(--gl-ink-dim)" x-text="t('brand.tagline')"></div>
+    <!-- ─────────────────────────────── hero ─────────────────────────────── -->
+    <section class="relative gl-section pt-32 sm:pt-40">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="max-w-3xl">
+          <span class="gl-hero-badge gl-reveal"><span class="gl-dot gl-dot-danger"></span> 24/7 emergency capacity coordination</span>
+          <h1 class="gl-display mt-7 gl-reveal">
+            Every second counts.<br />
+            GoldenLine saves
+            <span class="gl-rotator" aria-hidden="true">
+              <span class="is-active">time.</span><span>beds.</span><span>lives.</span>
+            </span>
+          </h1>
+          <p class="gl-lead mt-6 max-w-2xl gl-reveal">
+            India's first real-time bridge between the point of crisis and the point of care.
+            GoldenLine links families, ambulances, hospitals and blood banks into a single
+            coordinated network — so a critical patient reaches the <strong class="text-white">right bed inside the golden hour</strong>,
+            never a guess and never a double-booking.
+          </p>
+          <div class="mt-9 flex flex-wrap items-center gap-3 gl-reveal">
+            <a href="login.html" class="gl-btn-primary rounded-xl px-6 py-3 text-sm">Open the console</a>
+            <a href="#solution" class="gl-btn-secondary rounded-xl px-6 py-3 text-sm">See how it works</a>
+          </div>
         </div>
 
-        <!-- ── sign-in tabs (hidden while the forgot-password flow is open) ── -->
-        <template x-if="!forgotOpen">
-          <div>
-            <div class="flex border-b border-white/10 mb-5 text-sm font-medium">
-              <button type="button" class="gl-tab px-3 py-2" :class="tab === 'staff' && 'gl-tab-active'"
-                @click="tab = 'staff'" x-text="t('auth.tabStaff')"></button>
-              <button type="button" class="gl-tab px-3 py-2" :class="tab === 'family' && 'gl-tab-active'"
-                @click="tab = 'family'" x-text="t('auth.tabFamily')"></button>
-            </div>
-
-            <!-- staff login -->
-            <template x-if="tab === 'staff'">
-              <form @submit.prevent="signInStaff()" class="space-y-3">
-                <p class="text-xs" style="color:var(--gl-ink-dim)" x-text="t('auth.staffIntro')"></p>
-                <div>
-                  <label class="block text-xs mb-1" style="color:var(--gl-ink-dim)" x-text="t('auth.accountId')"></label>
-                  <input x-model="staff.id" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm" autocomplete="username" />
-                </div>
-                <div>
-                  <label class="block text-xs mb-1" style="color:var(--gl-ink-dim)" x-text="t('auth.password')"></label>
-                  <input x-model="staff.pw" type="password" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm" autocomplete="current-password" />
-                </div>
-                <p x-show="staff.error" x-text="staff.error" class="text-xs text-rose-300"></p>
-                <button type="submit" :disabled="staff.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm">
-                  <span x-text="staff.loading ? t('auth.signingIn') : t('auth.signIn')"></span>
-                </button>
-                <button type="button" @click="openForgot()" class="gl-link text-xs block mx-auto pt-1" x-text="t('auth.forgotPassword')"></button>
-              </form>
-            </template>
-
-            <!-- family / OTP -->
-            <template x-if="tab === 'family'">
-              <div>
-                <template x-if="!family.otpId">
-                  <form @submit.prevent="sendFamilyOtp()" class="space-y-3">
-                    <p class="text-xs" style="color:var(--gl-ink-dim)" x-text="t('auth.familyIntro')"></p>
-                    <input x-model="family.phone" required inputmode="numeric" maxlength="10"
-                      class="gl-input w-full rounded-lg px-3 py-2.5 text-sm" :placeholder="t('auth.phoneNumber')" />
-                    <p x-show="family.error" x-text="family.error" class="text-xs text-rose-300"></p>
-                    <button type="submit" :disabled="family.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm" x-text="t('auth.sendCode')"></button>
-                  </form>
-                </template>
-                <template x-if="family.otpId">
-                  <form @submit.prevent="verifyFamilyOtp()" class="space-y-3">
-                    <p class="text-xs" style="color:var(--gl-ink-dim)">
-                      <span x-text="t('auth.otpSentTo')"></span> <span class="text-white" x-text="family.sentTo"></span>
-                    </p>
-                    <p x-show="family.devCode" class="text-xs rounded-md px-2.5 py-2" style="background:rgba(242,193,78,.12); color:var(--gl-gold-soft)">
-                      <span x-text="t('auth.devCodeNote')"></span> <strong x-text="family.devCode"></strong>
-                    </p>
-                    <input x-model="family.code" required inputmode="numeric" maxlength="6"
-                      class="gl-input w-full rounded-lg px-3 py-2.5 text-sm tracking-[0.3em] text-center" :placeholder="t('auth.otpCode')" />
-                    <p x-show="family.error" x-text="family.error" class="text-xs text-rose-300"></p>
-                    <button type="submit" :disabled="family.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm" x-text="t('auth.verifyContinue')"></button>
-                    <button type="button" @click="sendFamilyOtp()" class="gl-link text-xs block mx-auto pt-1" x-text="t('auth.resendCode')"></button>
-                  </form>
-                </template>
-              </div>
-            </template>
-
-            <!-- quick demo accounts (judges / reviewers) -->
-            <div class="mt-6 pt-4 border-t border-white/10">
-              <p class="text-[11px] text-center mb-2" style="color:var(--gl-ink-dim)" x-text="t('auth.demoAccounts')"></p>
-              <div class="flex flex-wrap gap-1.5 justify-center">
-                <template x-for="a in demoAccounts" :key="a.id">
-                  <button type="button" @click="pickDemo(a)" class="gl-chip text-[11px] rounded-full px-2.5 py-1"
-                    x-text="t('role.' + a.roleKey)"></button>
-                </template>
-              </div>
-            </div>
+        <div class="mt-16 grid sm:grid-cols-3 gap-px rounded-2xl overflow-hidden gl-reveal"
+             style="background:var(--gl-hairline);border:1px solid var(--gl-card-border)">
+          <div class="p-6" style="background:var(--gl-surface-1)">
+            <div class="gl-count gl-stat-value" data-count="1" data-suffix="s" data-prefix="&lt;">&lt;1s</div>
+            <div class="text-xs mt-2" style="color:var(--gl-ink-dim)">to lock a bed — atomically, never twice</div>
           </div>
-        </template>
-
-        <!-- ── forgot password ── -->
-        <template x-if="forgotOpen">
-          <div>
-            <button type="button" @click="closeForgot()" class="gl-link text-xs mb-3 block" x-text="t('auth.backToSignIn')"></button>
-            <h2 class="text-white font-semibold mb-3" x-text="t('forgot.title')"></h2>
-
-            <template x-if="forgotStep === 1">
-              <form @submit.prevent="requestReset()" class="space-y-3">
-                <p class="text-xs" style="color:var(--gl-ink-dim)" x-text="t('forgot.step1Intro')"></p>
-                <input x-model="forgot.id" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm" :placeholder="t('auth.accountId')" />
-                <p x-show="forgot.error" x-text="forgot.error" class="text-xs text-rose-300"></p>
-                <button type="submit" :disabled="forgot.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm" x-text="t('forgot.sendCode')"></button>
-              </form>
-            </template>
-
-            <template x-if="forgotStep === 2">
-              <form @submit.prevent="submitReset()" class="space-y-3">
-                <p class="text-xs" style="color:var(--gl-ink-dim)" x-text="t('forgot.step2Intro')"></p>
-                <p x-show="forgot.devCode" class="text-xs rounded-md px-2.5 py-2" style="background:rgba(242,193,78,.12); color:var(--gl-gold-soft)">
-                  <span x-text="t('auth.devCodeNote')"></span> <strong x-text="forgot.devCode"></strong>
-                </p>
-                <input x-model="forgot.code" required inputmode="numeric" maxlength="6"
-                  class="gl-input w-full rounded-lg px-3 py-2.5 text-sm tracking-[0.3em] text-center" :placeholder="t('auth.otpCode')" />
-                <input x-model="forgot.newPw" type="password" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm"
-                  :placeholder="t('forgot.newPassword')" autocomplete="new-password" />
-                <input x-model="forgot.confirmPw" type="password" required class="gl-input w-full rounded-lg px-3 py-2.5 text-sm"
-                  :placeholder="t('forgot.confirmPassword')" autocomplete="new-password" />
-                <p x-show="forgot.error" x-text="forgot.error" class="text-xs text-rose-300"></p>
-                <button type="submit" :disabled="forgot.loading" class="gl-btn-primary w-full rounded-lg py-2.5 text-sm" x-text="t('forgot.resetButton')"></button>
-              </form>
-            </template>
+          <div class="p-6" style="background:var(--gl-surface-1)">
+            <div class="gl-count gl-stat-value" data-count="25">25</div>
+            <div class="text-xs mt-2" style="color:var(--gl-ink-dim)">hospitals + blood banks on one live map</div>
           </div>
-        </template>
+          <div class="p-6" style="background:var(--gl-surface-1)">
+            <div class="gl-count gl-stat-value" data-count="24" data-suffix="/7">24/7</div>
+            <div class="text-xs mt-2" style="color:var(--gl-ink-dim)">background safety watch — a human closes every alert</div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <!-- ─────────────────────────── feature strip ─────────────────────────── -->
-    <div class="gl-hide-mobile mt-10 grid sm:grid-cols-3 gap-4 max-w-4xl w-full gl-fade-up" style="animation-delay:.3s">
-      <div class="gl-card p-4">
-        <div class="text-sm font-semibold" style="color:var(--gl-gold-soft)" x-text="t('hero.feature1.title')"></div>
-        <div class="text-xs mt-1.5 leading-relaxed" style="color:var(--gl-ink-dim)" x-text="t('hero.feature1.body')"></div>
+    <!-- ─────────────────────── the emergency gap ─────────────────────── -->
+    <section class="gl-section" style="background:linear-gradient(180deg, transparent, rgba(0,0,0,.25))">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-[1.3fr_1fr] gap-12 items-center">
+        <div class="gl-reveal">
+          <span class="gl-section-eyebrow">The emergency gap</span>
+          <h2 class="gl-h2">Every minute lost costs a life.</h2>
+          <p class="gl-lead mt-5">
+            When someone collapses, the clock that matters isn't the ambulance's — it's the patient's.
+            Fragmented dispatch, phone-tree bed hunts and blind handoffs burn the minutes that decide
+            whether damage is reversible. GoldenLine removes the guesswork between the call and the bed.
+          </p>
+          <ul class="mt-7 space-y-3 text-sm" style="color:var(--gl-ink-dim)">
+            <li class="flex gap-3"><span style="color:var(--gl-gold)">→</span> Ranked hospital match by live bed availability, capability and distance</li>
+            <li class="flex gap-3"><span style="color:var(--gl-gold)">→</span> The bed is held the instant it's chosen — two ambulances can't win the same one</li>
+            <li class="flex gap-3"><span style="color:var(--gl-gold)">→</span> The ER sees the patient, the vitals and the prep list before arrival</li>
+          </ul>
+        </div>
+        <div class="gl-reveal">
+          <div class="gl-glass rounded-3xl p-8 text-center">
+            <div class="gl-count" style="color:#fff; font-size:5rem" data-count="60">60</div>
+            <div class="text-sm font-semibold mt-1" style="color:var(--gl-gold-soft)">The golden hour</div>
+            <div class="text-xs mt-2" style="color:var(--gl-ink-faint)">Minutes that define survival for a critical patient. GoldenLine's whole job is to protect them.</div>
+          </div>
+        </div>
       </div>
-      <div class="gl-card p-4">
-        <div class="text-sm font-semibold" style="color:var(--gl-gold-soft)" x-text="t('hero.feature2.title')"></div>
-        <div class="text-xs mt-1.5 leading-relaxed" style="color:var(--gl-ink-dim)" x-text="t('hero.feature2.body')"></div>
-      </div>
-      <div class="gl-card p-4">
-        <div class="text-sm font-semibold" style="color:var(--gl-gold-soft)" x-text="t('hero.feature3.title')"></div>
-        <div class="text-xs mt-1.5 leading-relaxed" style="color:var(--gl-ink-dim)" x-text="t('hero.feature3.body')"></div>
-      </div>
-    </div>
+    </section>
 
-    <!-- ─────────────────────────── stat strip ─────────────────────────── -->
-    <div class="gl-hide-mobile mt-8 flex gap-10 sm:gap-16 gl-fade-up" style="animation-delay:.4s">
-      <div class="text-center">
-        <div class="text-2xl font-bold gl-stat-value" x-text="t('hero.stat1.value')"></div>
-        <div class="text-[11px] mt-1 max-w-[9rem]" style="color:var(--gl-ink-dim)" x-text="t('hero.stat1.label')"></div>
+    <!-- ─────────────────────── one integrated network ─────────────────── -->
+    <section id="solution" class="gl-section">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="max-w-2xl gl-reveal">
+          <span class="gl-section-eyebrow">The GoldenLine solution</span>
+          <h2 class="gl-h2">One integrated network of emergency and critical care.</h2>
+          <p class="gl-lead mt-5">Dispatch, ambulances, hospitals, blood banks and a control room — coordinated on a single real-time platform.</p>
+        </div>
+        <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="gl-feature-card gl-reveal">
+            <span class="gl-feature-ico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.3 17 15a1 1 0 0 1-.9 1.5H3.9A1 1 0 0 1 3 15L10 2.3z"/><path d="M10 8v3.4"/><circle cx="10" cy="13.7" r=".2" fill="currentColor"/></svg></span>
+            <div class="font-semibold text-white">Prompt dispatch</div>
+            <p class="text-sm mt-1.5" style="color:var(--gl-ink-dim)">Nearest capable ambulance, auto-assigned the moment an SOS lands — with live tracking the family can watch.</p>
+          </div>
+          <div class="gl-feature-card gl-reveal">
+            <span class="gl-feature-ico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 15V8a1 1 0 0 1 1-1H8a1 1 0 0 1 1 1v2.6"/><path d="M2.5 15v-2.7A1.3 1.3 0 0 1 3.8 11h12.4a1.8 1.8 0 0 1 1.8 1.8V15"/><path d="M2.5 12h15"/><circle cx="5.8" cy="7" r="1.2"/></svg></span>
+            <div class="font-semibold text-white">Atomic bed locks</div>
+            <p class="text-sm mt-1.5" style="color:var(--gl-ink-dim)">Availability is derived live from real capacity minus active holds. One database write, no drift, no double-booking.</p>
+          </div>
+          <div class="gl-feature-card gl-reveal">
+            <span class="gl-feature-ico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5c-3 0-5.3 2.3-5.3 5.3 0 4 5.3 9.7 5.3 9.7s5.3-5.7 5.3-9.7C15.3 4.8 13 2.5 10 2.5Z"/><circle cx="10" cy="7.8" r="1.8"/></svg></span>
+            <div class="font-semibold text-white">Arrival-ready ERs</div>
+            <p class="text-sm mt-1.5" style="color:var(--gl-ink-dim)">Symptoms, criticality, crew notes and a prep checklist reach the receiving hospital before the ambulance does.</p>
+          </div>
+          <div class="gl-feature-card gl-reveal">
+            <span class="gl-feature-ico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.7 10S4.8 4.3 10 4.3 18.3 10 18.3 10 15.2 15.7 10 15.7 1.7 10 1.7 10Z"/><circle cx="10" cy="10" r="2.2"/></svg></span>
+            <div class="font-semibold text-white">Human-in-the-loop</div>
+            <p class="text-sm mt-1.5" style="color:var(--gl-ink-dim)">A background control room raises anomalies, conflicts and reconciliation gaps — and a person closes every single one.</p>
+          </div>
+        </div>
       </div>
-      <div class="text-center">
-        <div class="text-2xl font-bold gl-stat-value" x-text="t('hero.stat2.value')"></div>
-        <div class="text-[11px] mt-1 max-w-[9rem]" style="color:var(--gl-ink-dim)" x-text="t('hero.stat2.label')"></div>
+    </section>
+
+    <!-- ─────────────────────── care at every stage ─────────────────────── -->
+    <section id="roadmap" class="gl-section" style="background:linear-gradient(180deg, rgba(0,0,0,.25), transparent)">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="max-w-2xl gl-reveal">
+          <span class="gl-section-eyebrow">How it works</span>
+          <h2 class="gl-h2">Coordinated at every stage — call to recovery.</h2>
+        </div>
+        <div class="mt-12 grid md:grid-cols-3 gap-4">
+          <div class="gl-card p-7 gl-reveal">
+            <div class="text-xs font-bold tracking-widest" style="color:var(--gl-gold)">01 · CRISIS</div>
+            <div class="text-lg font-semibold text-white mt-3">Dispatch &amp; triage</div>
+            <ul class="mt-4 space-y-2.5 text-sm" style="color:var(--gl-ink-dim)">
+              <li>SOS by phone-verified tap, or helper-started on scene</li>
+              <li>Nearest ambulance auto-assigned, live position shared</li>
+              <li>On-scene assessment — fixed criticality + symptom checklist, voice or tap</li>
+            </ul>
+          </div>
+          <div class="gl-card p-7 gl-reveal">
+            <div class="text-xs font-bold tracking-widest" style="color:var(--gl-gold)">02 · CARE</div>
+            <div class="text-lg font-semibold text-white mt-3">Match, lock &amp; route</div>
+            <ul class="mt-4 space-y-2.5 text-sm" style="color:var(--gl-ink-dim)">
+              <li>Three cost-class hospital options, ranked by live data</li>
+              <li>Bed locked atomically; blood held if the case needs it</li>
+              <li>Road-following route + ETA range, prep list pushed to the ER</li>
+            </ul>
+          </div>
+          <div class="gl-card p-7 gl-reveal">
+            <div class="text-xs font-bold tracking-widest" style="color:var(--gl-gold)">03 · RECOVERY</div>
+            <div class="text-lg font-semibold text-white mt-3">Handoff &amp; close-out</div>
+            <ul class="mt-4 space-y-2.5 text-sm" style="color:var(--gl-ink-dim)">
+              <li>QR handoff admits the patient and releases the held bed</li>
+              <li>Discharge returns the bed to live count, invites feedback</li>
+              <li>Control room reconciles every reported vs. actual mismatch</li>
+            </ul>
+          </div>
+        </div>
       </div>
-      <div class="text-center">
-        <div class="text-2xl font-bold gl-stat-value" x-text="t('hero.stat3.value')"></div>
-        <div class="text-[11px] mt-1 max-w-[9rem]" style="color:var(--gl-ink-dim)" x-text="t('hero.stat3.label')"></div>
+    </section>
+
+    <!-- ─────────────────────────── numbers ─────────────────────────── -->
+    <section id="numbers" class="gl-section">
+      <div class="max-w-6xl mx-auto px-5 sm:px-8">
+        <div class="max-w-2xl gl-reveal">
+          <span class="gl-section-eyebrow">Why it holds up</span>
+          <h2 class="gl-h2">Built to be trusted at 3 a.m.</h2>
+        </div>
+        <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="gl-card p-6 gl-reveal">
+            <div class="gl-count gl-stat-value" data-count="16">16</div>
+            <div class="text-sm mt-2" style="color:var(--gl-ink-dim)">functional requirements, built and tested end to end</div>
+          </div>
+          <div class="gl-card p-6 gl-reveal">
+            <div class="gl-count gl-stat-value" data-count="283">283</div>
+            <div class="text-sm mt-2" style="color:var(--gl-ink-dim)">automated tests — concurrency, RBAC, privacy, the lot</div>
+          </div>
+          <div class="gl-card p-6 gl-reveal">
+            <div class="gl-count gl-stat-value" data-count="4">4</div>
+            <div class="text-sm mt-2" style="color:var(--gl-ink-dim)">languages in the operator console — en · हि · த · বাং</div>
+          </div>
+          <div class="gl-card p-6 gl-reveal">
+            <div class="gl-count gl-stat-value" data-count="0">0</div>
+            <div class="text-sm mt-2" style="color:var(--gl-ink-dim)">beds ever double-booked — provable, by design</div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <!-- ─────────────────────────────── faq ─────────────────────────────── -->
+    <section id="faq" class="gl-section" style="background:linear-gradient(180deg, rgba(0,0,0,.25), transparent)">
+      <div class="max-w-3xl mx-auto px-5 sm:px-8">
+        <div class="gl-reveal">
+          <span class="gl-section-eyebrow">FAQ</span>
+          <h2 class="gl-h2">Questions, answered.</h2>
+        </div>
+        <div class="mt-10 gl-reveal" id="faqList">
+          <div class="gl-accordion-item">
+            <button class="gl-accordion-q">What is GoldenLine?<span class="gl-accordion-plus">+</span></button>
+            <div class="gl-accordion-a"><div>A real-time emergency capacity coordination platform. It connects the family's SOS, the ambulance crew, receiving hospitals and blood banks on one system so a critical patient is matched to an available, capable bed — and that bed is held — within the golden hour.</div></div>
+          </div>
+          <div class="gl-accordion-item">
+            <button class="gl-accordion-q">How does a bed get "locked"?<span class="gl-accordion-plus">+</span></button>
+            <div class="gl-accordion-a"><div>The instant a hospital is chosen for a case, GoldenLine writes a single atomic database record that reserves the bed. Live availability is always real capacity minus active locks, so there is no separate counter to drift and two ambulances can never be told the same bed is free.</div></div>
+          </div>
+          <div class="gl-accordion-item">
+            <button class="gl-accordion-q">Who can see a patient's data?<span class="gl-accordion-plus">+</span></button>
+            <div class="gl-accordion-a"><div>Access is scoped per case and per role, enforced centrally. The family sees only their own case via a phone-verified link; the receiving hospital sees only what it needs to prepare; nothing carries free-text diagnosis. Family tracking links are opaque tokens, never the case ID.</div></div>
+          </div>
+          <div class="gl-accordion-item">
+            <button class="gl-accordion-q">What does the control room actually do?<span class="gl-accordion-plus">+</span></button>
+            <div class="gl-accordion-a"><div>It runs in the background — no chat, no override. It raises three kinds of flag: anomalies (a stale GPS, a quiet in-transit case), conflicts (two cases contending for one bed) and reconciliation gaps (a hospital's reported count disagreeing with active locks). Every flag escalates to a named human, and only a human resolves it.</div></div>
+          </div>
+          <div class="gl-accordion-item">
+            <button class="gl-accordion-q">Does it need a network connection to work?<span class="gl-accordion-plus">+</span></button>
+            <div class="gl-accordion-a"><div>The ambulance-side helper app is offline-first: assessments and location updates queue locally and sync automatically when the connection returns. An estimated location never looks like a live one, and the ETA is always a range, never a countdown.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────── final CTA ─────────────────────────── -->
+    <section class="gl-section">
+      <div class="max-w-4xl mx-auto px-5 sm:px-8 text-center gl-reveal">
+        <h2 class="gl-h2">Every bed, on one line.</h2>
+        <p class="gl-lead mt-4 max-w-xl mx-auto">Sign in to the operator console — dispatch, hospitals, blood banks and the control room, all in one place.</p>
+        <a href="login.html" class="gl-btn-primary rounded-xl px-7 py-3.5 text-sm inline-block mt-8">Sign in to GoldenLine</a>
+      </div>
+    </section>
   </main>
 
-  <footer class="relative z-10 text-center pb-6 px-4 text-[11px]" style="color:var(--gl-ink-dim)">
-    <span x-text="t('brand.tagline')"></span> · <span x-text="t('footer.tag')"></span>
+  <footer class="border-t" style="border-color:var(--gl-hairline)">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs" style="color:var(--gl-ink-faint)">
+      <div class="flex items-center gap-2">
+        <span class="gl-brand-mark" style="width:1.4rem;height:1.4rem;font-size:.6rem">G</span>
+        <span>GoldenLine · the golden thread between every emergency and the right bed</span>
+      </div>
+      <div>Built for SIH 2026 · <span id="apiState">checking API…</span></div>
+    </div>
   </footer>
 
-  <script src="login.js"></script>
+  <script src="landing.js"></script>
 </body>
 </html>

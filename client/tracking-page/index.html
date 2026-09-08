@@ -7,102 +7,145 @@
   <link rel="icon" href="data:," />
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../theme.css" />
   <style>
-    html, body { margin: 0; min-height: 100%; background: var(--gl-deep); color: var(--gl-ink);
-      font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Noto Sans", sans-serif; }
-    .gl-bg { position: fixed; inset: 0; z-index: 0;
-      background: radial-gradient(ellipse 900px 500px at 50% -10%, rgba(45,66,130,.35), transparent 60%),
-        linear-gradient(165deg, var(--gl-deep) 0%, var(--gl-mid) 60%, var(--gl-navy) 100%); }
+    html, body { margin: 0; min-height: 100%; background: var(--gl-deep); color: var(--gl-ink); font-family: var(--gl-font); -webkit-font-smoothing: antialiased; }
+    .gl-bg {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 800px 460px at 50% -12%, rgba(243, 194, 78, 0.12), transparent 60%),
+        radial-gradient(ellipse 700px 520px at 90% 112%, rgba(126, 140, 248, 0.1), transparent 60%),
+        linear-gradient(168deg, var(--gl-mid) 0%, var(--gl-deep) 60%, #080b11 100%);
+    }
+    .gl-spin { animation: gl-spin .7s linear infinite; }
+    @keyframes gl-spin { to { transform: rotate(360deg); } }
+    /* progress stepper */
+    .gl-step { display: flex; align-items: center; gap: .5rem; flex: 1; }
+    .gl-step-dot {
+      width: 1.6rem; height: 1.6rem; border-radius: 999px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 700;
+      background: var(--gl-well); border: 1px solid var(--gl-hairline); color: var(--gl-ink-faint);
+    }
+    .gl-step-line { flex: 1; height: 2px; background: var(--gl-hairline); border-radius: 999px; }
+    .gl-step.is-done .gl-step-dot,
+    .gl-step.is-current .gl-step-dot {
+      background: linear-gradient(135deg, var(--gl-gold-soft), var(--gl-gold-deep));
+      border-color: transparent; color: var(--gl-gold-ink);
+    }
+    .gl-step.is-current .gl-step-dot { box-shadow: 0 0 0 4px rgba(243, 194, 78, 0.18); }
+    .gl-step.is-done .gl-step-line { background: var(--gl-gold-deep); }
   </style>
 </head>
 <body class="antialiased" x-data="trackingApp()" x-init="init()" x-cloak>
   <div class="gl-bg" aria-hidden="true"></div>
 
-  <div class="relative z-10 max-w-md mx-auto px-4 py-8 space-y-4">
-    <div class="flex items-center gap-2">
-      <span class="text-lg gl-glow-pulse leading-none" style="color:var(--gl-gold)">◆</span>
-      <span class="font-semibold text-white">GoldenLine</span>
-      <span class="text-sm" style="color:var(--gl-ink-dim)">Case Tracking</span>
+  <div class="relative z-10 max-w-md mx-auto px-4 py-8 sm:py-12 space-y-4">
+    <div class="flex items-center gap-2.5">
+      <span class="gl-brand-mark text-sm gl-glow-pulse">G</span>
+      <div class="leading-tight">
+        <div class="font-semibold text-white">GoldenLine</div>
+        <div class="text-[11px]" style="color:var(--gl-ink-faint)">Case tracking · live</div>
+      </div>
     </div>
 
     <template x-if="state === 'loading'">
-      <div class="gl-card p-6 flex items-center gap-2 text-sm" style="color:var(--gl-ink-dim)">
-        <div class="w-4 h-4 rounded-full border-2" style="border-color:var(--gl-gold); border-right-color:transparent; animation:spin .7s linear infinite"></div>
-        Loading…
+      <div class="gl-card p-6 flex items-center gap-3 text-sm" style="color:var(--gl-ink-dim)">
+        <div class="w-4 h-4 rounded-full border-2 gl-spin" style="border-color:var(--gl-gold); border-right-color:transparent"></div>
+        Loading the latest status…
       </div>
     </template>
 
     <template x-if="state === 'notfound'">
       <div class="gl-card p-6 text-sm">
-        <p style="color:var(--gl-ink)">This tracking link isn't valid.</p>
-        <p class="mt-1" style="color:var(--gl-ink-faint)">Double-check the link from the SMS, or ask the ambulance helper for it again.</p>
+        <p class="font-medium" style="color:var(--gl-ink)">This tracking link isn't valid.</p>
+        <p class="mt-1.5" style="color:var(--gl-ink-faint)">Double-check the link from the SMS, or ask the ambulance helper to send it again.</p>
       </div>
     </template>
 
     <template x-if="state === 'expired'">
-      <div class="gl-card p-6 text-sm" style="border-color:rgba(245,158,11,.35)">
-        <p style="color:#fcd34d">This link has expired.</p>
-        <p class="mt-1" style="color:var(--gl-ink-faint)">Tracking links stay active for a day or two after a case closes.</p>
+      <div class="gl-card p-6 text-sm" style="border-color:rgba(251,191,36,.35)">
+        <p class="font-medium" style="color:var(--gl-warn)">This link has expired.</p>
+        <p class="mt-1.5" style="color:var(--gl-ink-faint)">Tracking links stay active for a day or two after a case closes.</p>
       </div>
     </template>
 
     <template x-if="state === 'error'">
       <div class="gl-card p-6 text-sm">
-        <p style="color:var(--gl-ink)">Couldn't reach the server. This page will keep trying.</p>
+        <p style="color:var(--gl-ink)">Couldn't reach the server. This page will keep trying automatically.</p>
       </div>
     </template>
 
     <template x-if="state === 'active' && view">
       <div class="space-y-4">
-        <div class="gl-card p-4 flex items-center justify-between">
-          <span class="text-sm" style="color:var(--gl-ink-dim)">Status</span>
-          <span class="gl-badge" :class="stageBadgeClass(view.stage)" x-text="stageLabel(view.stage)"></span>
+
+        <!-- status + stepper -->
+        <div class="gl-card p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="gl-eyebrow">Status</span>
+            <span class="gl-badge" :class="stageBadgeClass(view.stage)" x-text="stageLabel(view.stage)"></span>
+          </div>
+          <div class="flex items-center">
+            <template x-for="(label, i) in ['En route', 'At hospital', 'Discharged']" :key="i">
+              <div class="gl-step" :class="{ 'is-done': stageStep(view.stage) > i, 'is-current': stageStep(view.stage) === i }">
+                <div class="gl-step-dot" x-text="stageStep(view.stage) > i ? '✓' : (i + 1)"></div>
+                <div class="text-[11px] leading-tight" style="color:var(--gl-ink-dim)" x-text="label"></div>
+                <div class="gl-step-line" x-show="i < 2"></div>
+              </div>
+            </template>
+          </div>
         </div>
 
+        <!-- hospital -->
         <template x-if="view.hospital">
-          <div class="gl-card p-4 text-sm space-y-1.5">
-            <div class="text-xs uppercase tracking-wide" style="color:var(--gl-gold-soft)">Hospital</div>
+          <div class="gl-card p-5 text-sm space-y-1.5">
+            <div class="gl-eyebrow">Destination hospital</div>
             <div class="text-lg font-semibold text-white" x-text="view.hospital.name"></div>
             <div style="color:var(--gl-ink-dim)" x-text="view.hospital.why_chosen"></div>
           </div>
         </template>
         <template x-if="!view.hospital">
-          <div class="gl-card p-4 text-sm" style="color:var(--gl-ink-faint)">
+          <div class="gl-card p-5 text-sm" style="color:var(--gl-ink-faint)">
             A hospital hasn't been chosen for this case yet.
           </div>
         </template>
 
+        <!-- ETA -->
         <template x-if="view.eta">
-          <div class="gl-card p-4 text-sm">
-            <div class="text-xs uppercase tracking-wide mb-1" style="color:var(--gl-gold-soft)">Estimated arrival</div>
-            <div class="text-2xl font-semibold gl-stat-value" x-text="view.eta.min_minutes + '–' + view.eta.max_minutes + ' min'"></div>
-            <div class="text-xs mt-1" style="color:var(--gl-ink-faint)">A range, not a countdown — traffic varies.</div>
+          <div class="gl-card p-5">
+            <div class="gl-eyebrow mb-1.5">Estimated arrival</div>
+            <div class="gl-stat-value text-3xl font-bold" x-text="view.eta.min_minutes + '–' + view.eta.max_minutes + ' min'"></div>
+            <div class="text-xs mt-1.5" style="color:var(--gl-ink-faint)">A range, not a countdown — traffic varies.</div>
           </div>
         </template>
 
+        <!-- bed + check-in -->
         <div class="grid grid-cols-2 gap-3">
-          <div class="gl-card p-3 text-sm">
-            <div style="color:var(--gl-ink-faint)" class="text-xs mb-1">Bed</div>
+          <div class="gl-card p-4 text-sm">
+            <div class="gl-eyebrow mb-2">Bed</div>
             <span class="gl-badge" :class="view.bed_lock_status === 'confirmed' ? 'gl-badge-emerald' : 'gl-badge-slate'"
-              x-text="view.bed_lock_status === 'confirmed' ? 'Reserved' : 'Not yet'"></span>
+              x-text="view.bed_lock_status === 'confirmed' ? 'Reserved' : 'Pending'"></span>
           </div>
-          <div class="gl-card p-3 text-sm">
-            <div style="color:var(--gl-ink-faint)" class="text-xs mb-1">Check-in</div>
+          <div class="gl-card p-4 text-sm">
+            <div class="gl-eyebrow mb-2">Check-in</div>
             <span class="gl-badge" :class="view.qr_handoff_status === 'confirmed' ? 'gl-badge-emerald' : 'gl-badge-slate'"
-              x-text="view.qr_handoff_status === 'confirmed' ? 'Arrived' : 'Not yet'"></span>
+              x-text="view.qr_handoff_status === 'confirmed' ? 'Arrived' : 'Pending'"></span>
           </div>
         </div>
 
-        <div class="gl-card p-4 text-sm">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs uppercase tracking-wide" style="color:var(--gl-gold-soft)">Hospital preparation</span>
-            <span style="color:var(--gl-ink-faint)" x-text="view.prep_status.confirmed + ' / ' + view.prep_status.total"></span>
+        <!-- prep -->
+        <div class="gl-card p-5 text-sm">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="gl-eyebrow">Hospital preparation</span>
+            <span class="gl-badge gl-badge-slate" x-text="view.prep_status.confirmed + ' / ' + view.prep_status.total"></span>
           </div>
-          <ul class="space-y-1">
+          <ul class="space-y-1.5">
             <template x-for="u in view.prep_status.updates" :key="u.item">
-              <li class="flex items-center gap-1.5">
-                <span x-text="u.status === 'confirmed' ? '✓' : '◻'" :style="u.status === 'confirmed' ? 'color:var(--gl-gold-soft)' : 'color:var(--gl-ink-faint)'"></span>
+              <li class="flex items-center gap-2">
+                <span x-text="u.status === 'confirmed' ? '✓' : '○'" :style="u.status === 'confirmed' ? 'color:var(--gl-gold-soft)' : 'color:var(--gl-ink-faint)'"></span>
                 <span style="color:var(--gl-ink)" x-text="u.item"></span>
               </li>
             </template>
@@ -110,8 +153,8 @@
           </ul>
         </div>
 
-        <p class="text-xs text-center" style="color:var(--gl-ink-faint)">
-          This page updates itself automatically. No login needed — keep this link private.
+        <p class="text-xs text-center leading-relaxed" style="color:var(--gl-ink-faint)">
+          This page refreshes itself automatically. No login needed — please keep the link private.
         </p>
       </div>
     </template>

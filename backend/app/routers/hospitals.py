@@ -127,7 +127,8 @@ def select_hospital_path_a(
     db: Session = Depends(get_db),
 ) -> SelectionResponse:
     """Path A final selection — the helper's explicit tap on one of the 3
-    cost-class hospitals, made after asking the family which class they want."""
+    cost-class hospitals, made after asking the family (inside the ambulance,
+    or by phone) which class they want. Never the family directly."""
     case = _require_case(case_id, db)
     if case.creation_path.value != "A":
         raise HTTPException(
@@ -163,7 +164,9 @@ def confirm_hospital_path_b(
 
 def _select(db: Session, case: Case, payload: HospitalSelectionRequest) -> SelectionResponse:
     try:
-        case, lock = svc.select_hospital_by_helper(db, case, payload.hospital_id, payload.helper_id)
+        case, lock = svc.select_hospital_by_helper(
+            db, case, payload.hospital_id, payload.helper_id
+        )
         return _selection_response(case, lock)
     except svc.HospitalAlreadySelected:
         raise HTTPException(status.HTTP_409_CONFLICT, "a hospital is already selected for this case")

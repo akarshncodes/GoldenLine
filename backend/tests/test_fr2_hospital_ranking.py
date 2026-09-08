@@ -282,7 +282,8 @@ def test_second_selection_is_rejected(client):
 
 
 def test_family_cannot_select_a_hospital(client_factory):
-    """Hospital selection is helper-only now, both paths — never the family."""
+    """Hospital selection is helper-only, both paths — never the family. The
+    helper asks the family which cost class they'd like, then taps it."""
     admin = client_factory("admin")
     res = path_a_sos(admin, phone_number="9800000099")
     cid = res.json()["case"]["case_id"]

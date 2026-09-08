@@ -46,5 +46,10 @@ document.addEventListener('alpine:init', () => {
     stageBadgeClass(s) {
       return { en_route: 'gl-badge-sky', arrived: 'gl-badge-gold', discharged: 'gl-badge-slate' }[s] || 'gl-badge-slate';
     },
+    // 0-based position in the En route → Arrived → Discharged progression,
+    // used to light up the little stepper.
+    stageStep(s) {
+      return { en_route: 0, arrived: 1, discharged: 2 }[s] ?? 0;
+    },
   }));
 });

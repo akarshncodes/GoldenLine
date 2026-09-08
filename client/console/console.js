@@ -31,13 +31,13 @@ const VIEW_LABEL_KEYS = {
 };
 
 const NAV = {
-  helper:    [['cases', 'console.nav.cases']],
+  helper:    [['dashboard', 'console.nav.dashboard'], ['cases', 'console.nav.cases']],
   family:      [['sos', 'console.nav.sos']],
-  hospital:    [['beds', 'console.nav.beds'], ['census', 'console.nav.census'], ['roster', 'console.nav.roster'],
+  hospital:    [['dashboard', 'console.nav.dashboard'], ['beds', 'console.nav.beds'], ['census', 'console.nav.census'], ['roster', 'console.nav.roster'],
                 ['inventory', 'console.nav.inventory'], ['import', 'console.nav.import'], ['incoming', 'console.nav.incoming']],
-  bloodbank:   [['holds', 'console.nav.holds']],
-  controlroom: [['flags', 'console.nav.flags'], ['oversight', 'console.nav.oversight'], ['map', 'console.nav.map']],
-  admin:       [['cases', 'console.nav.allCases'], ['beds', 'console.nav.beds'], ['census', 'console.nav.census'],
+  bloodbank:   [['dashboard', 'console.nav.dashboard'], ['holds', 'console.nav.holds']],
+  controlroom: [['dashboard', 'console.nav.dashboard'], ['flags', 'console.nav.flags'], ['oversight', 'console.nav.oversight'], ['map', 'console.nav.map']],
+  admin:       [['dashboard', 'console.nav.dashboard'], ['cases', 'console.nav.allCases'], ['beds', 'console.nav.beds'], ['census', 'console.nav.census'],
                 ['roster', 'console.nav.roster'], ['inventory', 'console.nav.inventory'], ['import', 'console.nav.import'],
                 ['incoming', 'console.nav.incoming'],
                 ['holds', 'console.nav.holds'], ['flags', 'console.nav.flags'], ['oversight', 'console.nav.oversight'],
@@ -60,6 +60,7 @@ const SYMPTOM_TAGS = [
 // Small hand-drawn 20x20 monoline icons, one per nav item (currentColor stroke —
 // no icon-font/CDN dependency, matches the "no build" ethos of the rest of the client).
 const NAV_ICONS = {
+  dashboard: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="6.5" height="8" rx="1.2"/><rect x="11" y="2.5" width="6.5" height="5" rx="1.2"/><rect x="11" y="9.5" width="6.5" height="8" rx="1.2"/><rect x="2.5" y="12.5" width="6.5" height="5" rx="1.2"/></svg>',
   cases: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M7.5 3V2.6A1.1 1.1 0 0 1 8.6 1.5h2.8a1.1 1.1 0 0 1 1.1 1.1V3"/><path d="M7 9h6M7 12h6M7 15h3"/></svg>',
   case: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M7 9h6M7 12h6M7 15h3"/></svg>',
   sos: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.3 17 15a1 1 0 0 1-.9 1.5H3.9A1 1 0 0 1 3 15L10 2.3z"/><path d="M10 7.8v3.6"/><circle cx="10" cy="13.6" r=".2" fill="currentColor"/></svg>',
@@ -74,6 +75,24 @@ const NAV_ICONS = {
   roster: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="6" r="2.8"/><path d="M4 17c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M14.2 2.3a2.8 2.8 0 0 1 0 5.4"/></svg>',
   inventory: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5 10 3l7 3.5-7 3.5-7-3.5Z"/><path d="M3 6.5v7L10 17l7-3.5v-7"/><path d="M10 10v7"/></svg>',
   import: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5v10.5"/><path d="M6.3 9.3 10 13l3.7-3.7"/><path d="M3.5 15v1.3a1.2 1.2 0 0 0 1.2 1.2h10.6a1.2 1.2 0 0 0 1.2-1.2V15"/></svg>',
+};
+
+// Tiny 20x20 monoline icons for the dashboard KPI tiles + activity feed
+// (currentColor stroke — same no-dependency approach as NAV_ICONS).
+const DASH_ICONS = {
+  dot: '<svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="3"/></svg>',
+  case: NAV_ICONS.cases,
+  beds: NAV_ICONS.beds,
+  ambulance: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13V7.5A1.5 1.5 0 0 1 3.5 6h7l3 3h3A1.5 1.5 0 0 1 18 10.5V13"/><path d="M2 13h16"/><circle cx="6" cy="15" r="1.6"/><circle cx="14" cy="15" r="1.6"/><path d="M6.5 4v3M5 5.5h3"/></svg>',
+  flag: NAV_ICONS.flags,
+  staff: NAV_ICONS.roster,
+  inventory: NAV_ICONS.inventory,
+  census: NAV_ICONS.census,
+  incoming: NAV_ICONS.incoming,
+  holds: NAV_ICONS.holds,
+  map: NAV_ICONS.map,
+  oversight: NAV_ICONS.oversight,
+  dashboard: NAV_ICONS.dashboard,
 };
 
 // FR-22: which fields a receptionist can map a source column to, per target
@@ -100,8 +119,9 @@ document.addEventListener('alpine:init', () => {
     bootFailed: false,
 
     // ---- ui ----
-    screen: 'cases',
+    screen: 'dashboard',
     loading: false,
+    dash: {},                            // per-role Overview screen data (KPIs, chart inputs, feeds)
     apiUp: true,
     toasts: [],
     newCaseOpen: false,
@@ -142,6 +162,7 @@ document.addEventListener('alpine:init', () => {
     sheetUrl: 'https://sheets.example/h?general=9&icu=4',
     report: { gen: 0, icu: 0 },
     hc: {},                              // hospital's active case (case, prep, admitOk)
+    incomingShowClosed: false,           // incoming list: include ADMITTED/DISCHARGED
     scan: { caseId: '', token: '' },
     bedCategories: [],                   // FR-17: room/bed categories beyond general+ICU
     newCategory: { code: '', label: '', total_beds: 0 },
@@ -204,13 +225,25 @@ document.addEventListener('alpine:init', () => {
 
     roleLabel(k) { return this.t(VIEW_LABEL_KEYS[k]) || k; },
     nav() { return (NAV[this.viewRole] || []).map(([key, labelKey]) => ({ key, label: this.t(labelKey) })); },
+    // Small at-a-glance strip above the case table — derived purely from the
+    // already-loaded `cases` array, no extra request.
+    caseStats() {
+      const done = new Set(['DISCHARGED']);
+      const total = this.cases.length;
+      const completed = this.cases.filter(c => done.has(c.status)).length;
+      return [
+        { key: 'total',  labelKey: 'console.cases.statTotal',  value: total },
+        { key: 'active', labelKey: 'console.cases.statActive', value: total - completed },
+        { key: 'done',   labelKey: 'console.cases.statDone',   value: completed },
+      ];
+    },
     navIcon(key) { return NAV_ICONS[key] || ''; },
     symptomTags() { return SYMPTOM_TAGS; },
 
     async bootSession() {
       let token;
       try { token = localStorage.getItem(TOKEN_KEY); } catch { token = null; }
-      if (!token) { this.bootFailed = true; window.location.replace('../index.html'); return; }
+      if (!token) { this.bootFailed = true; window.location.replace('../login.html'); return; }
 
       try {
         const r = await fetch(`${API}/auth/me`, { headers: { authorization: `Bearer ${token}` } });
@@ -220,7 +253,7 @@ document.addEventListener('alpine:init', () => {
       } catch {
         try { localStorage.removeItem(TOKEN_KEY); } catch {}
         this.bootFailed = true;
-        window.location.replace('../index.html');
+        window.location.replace('../login.html');
         return;
       }
 
@@ -242,7 +275,7 @@ document.addEventListener('alpine:init', () => {
         localStorage.removeItem(FAMILY_OTP_KEY);
         localStorage.removeItem(FAMILY_PHONE_KEY);
       } catch {}
-      window.location.replace('../index.html');
+      window.location.replace('../login.html');
     },
 
     // ─────────────────────────── live ambulance location (helper's device GPS) ───────────────────────────
@@ -330,6 +363,20 @@ document.addEventListener('alpine:init', () => {
       }] : []);
     },
 
+    // Turn any FastAPI error body into one readable line — including a Pydantic
+    // 422 validation array ([{loc:[...,"field"], msg:"..."}]).
+    _errMsg(data) {
+      const d = data && data.detail;
+      if (typeof d === 'string') return d;
+      if (Array.isArray(d)) {
+        return d.map((e) => {
+          const field = Array.isArray(e.loc) ? e.loc[e.loc.length - 1] : '';
+          return `${field ? field + ': ' : ''}${(e.msg || '').replace(/^Value error, /, '')}`;
+        }).join('; ').slice(0, 200);
+      }
+      return d?.message || JSON.stringify(d || data || {}).slice(0, 200);
+    },
+
     // ─────────────────────────── api helper ───────────────────────────
     async api(method, path, body, { quiet = false } = {}) {
       this.loading = true;
@@ -344,8 +391,7 @@ document.addEventListener('alpine:init', () => {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          const msg = typeof data.detail === 'string' ? data.detail
-            : (data.detail?.message || JSON.stringify(data.detail || data).slice(0, 200));
+          const msg = this._errMsg(data);
           if (!quiet) this.toast(`${res.status} · ${msg}`, 'error');
           throw Object.assign(new Error(msg), { status: res.status, data });
         }
@@ -371,8 +417,7 @@ document.addEventListener('alpine:init', () => {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          const msg = typeof data.detail === 'string' ? data.detail
-            : (data.detail?.message || JSON.stringify(data.detail || data).slice(0, 200));
+          const msg = this._errMsg(data);
           this.toast(`${res.status} · ${msg}`, 'error');
           throw Object.assign(new Error(msg), { status: res.status, data });
         }
@@ -393,12 +438,14 @@ document.addEventListener('alpine:init', () => {
 
     // ─────────────────────────── router ───────────────────────────
     go(screen) {
+      if (screen !== 'dashboard' && typeof GLCharts !== 'undefined') GLCharts.destroyAll();
       this.screen = screen;
       if (screen === 'case' && this.viewRole === 'helper') this._startLiveLocation();
       else this._stopLiveLocation();
       if (screen !== 'case') this._stopFamilyCaseWatch();
       if (screen === 'sos') setTimeout(() => this._initSosMap(), 0);
       const load = {
+        dashboard: () => this.loadDashboard(),
         cases: () => this.loadCases(),
         sos: () => {},
         beds: () => this.loadBeds(),
@@ -416,12 +463,291 @@ document.addEventListener('alpine:init', () => {
       load && load();
     },
 
+    // ═══════════════════════════ DASHBOARD (per-role Overview) ═══════════════════════════
+    // Everything here is derived client-side from the same list endpoints the
+    // functional screens already use — no new backend routes. Charts are drawn
+    // by GLCharts (charts.js) from a setTimeout(…,0), never $nextTick.
+    dashIcon(k) { return DASH_ICONS[k] || DASH_ICONS.dot; },
+
+    _dayLabel(d) { return d.toLocaleDateString(this.lang === 'en' ? undefined : this.lang, { day: '2-digit', month: 'short' }); },
+    _bucketByDay(items, key, days = 14) {
+      const labels = [], data = [];
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const counts = {};
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today); d.setDate(d.getDate() - i);
+        const k = d.toISOString().slice(0, 10);
+        counts[k] = 0; labels.push(this._dayLabel(d));
+      }
+      for (const it of items || []) {
+        const raw = it[key]; if (!raw) continue;
+        const k = new Date(raw).toISOString().slice(0, 10);
+        if (k in counts) counts[k]++;
+      }
+      for (const k of Object.keys(counts)) data.push(counts[k]);
+      return { labels, data };
+    },
+    ago(iso) {
+      if (!iso) return '';
+      const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+      if (s < 60) return this.t('console.time.now');
+      if (s < 3600) return Math.floor(s / 60) + this.t('console.time.mAgo');
+      if (s < 86400) return Math.floor(s / 3600) + this.t('console.time.hAgo');
+      return Math.floor(s / 86400) + this.t('console.time.dAgo');
+    },
+
+    async loadDashboard() {
+      const fn = {
+        admin: () => this._dashAdmin(),
+        hospital: () => this._dashHospital(),
+        controlroom: () => this._dashControl(),
+        bloodbank: () => this._dashBlood(),
+        helper: () => this._dashHelper(),
+      }[this.viewRole];
+      this.dash = { ready: false };
+      if (fn) await fn();
+      this.dash.ready = true;
+      setTimeout(() => this._renderDashCharts(), 0);
+    },
+
+    _statusBreakdown(cases) {
+      const order = ['SOS_TRIGGERED', 'AMBULANCE_DISPATCHED', 'OPEN', 'ADMITTED', 'DISCHARGED'];
+      const map = {};
+      for (const c of cases) map[c.status] = (map[c.status] || 0) + 1;
+      const present = order.filter(s => map[s]);
+      return {
+        labels: present.map(s => this.statusLabel(s)),
+        data: present.map(s => map[s]),
+        colors: present.map(s => ({ SOS_TRIGGERED: '#fbbf24', AMBULANCE_DISPATCHED: '#58b6f0', OPEN: '#7e8cf8', ADMITTED: '#f3c24e', DISCHARGED: '#4ade80' }[s])),
+      };
+    },
+    _activeCases(cases) { return cases.filter(c => !['DISCHARGED'].includes(c.status)); },
+
+    async _dashAdmin() {
+      const [cases, hdash, ambulances, holds, flags, staff, inventory] = await Promise.all([
+        this.api('GET', '/cases', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/hospitals/dashboard', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/ambulances', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/blood-bank-holds', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/control-room/flags?include_resolved=true', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/staff', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/inventory', null, { quiet: true }).catch(() => []),
+      ]);
+      const genFree = hdash.reduce((a, h) => a + (h.available_general_beds || 0), 0);
+      const icuFree = hdash.reduce((a, h) => a + (h.available_icu_beds || 0), 0);
+      const dispatched = ambulances.filter(a => a.status !== 'idle').length;
+      const openFlags = flags.filter(f => f.status !== 'resolved').length;
+      const onDuty = staff.filter(s => s.on_duty_status === 'on_duty').length;
+      const lowStock = inventory.filter(i => i.is_low_stock).length;
+
+      this.dash.kpis = [
+        { k: 'cases', label: this.t('console.dash.kpiActiveCases'), value: this._activeCases(cases).length, sub: cases.length + ' ' + this.t('console.dash.subTotal') },
+        { k: 'beds', label: this.t('console.dash.kpiBedsFree'), value: genFree, sub: icuFree + ' ' + this.t('console.dash.subIcuFree') },
+        { k: 'ambulance', label: this.t('console.dash.kpiAmbulances'), value: dispatched, sub: ambulances.length + ' ' + this.t('console.dash.subFleet') },
+        { k: 'flag', label: this.t('console.dash.kpiOpenFlags'), value: openFlags, sub: flags.length + ' ' + this.t('console.dash.subAllTime') },
+        { k: 'staff', label: this.t('console.dash.kpiOnDuty'), value: onDuty, sub: staff.length + ' ' + this.t('console.dash.subRostered') },
+        { k: 'inventory', label: this.t('console.dash.kpiLowStock'), value: lowStock, sub: inventory.length + ' ' + this.t('console.dash.subItems') },
+      ];
+      this.dash.trend = this._bucketByDay(cases, 'created_at', 14);
+      this.dash.status = this._statusBreakdown(cases);
+      const fleetMap = { idle: 0, en_route_to_pickup: 0, en_route_to_hospital: 0 };
+      for (const a of ambulances) fleetMap[a.status] = (fleetMap[a.status] || 0) + 1;
+      this.dash.fleet = {
+        labels: [this.t('console.ambulanceStatus.idle'), this.t('console.ambulanceStatus.en_route_to_pickup'), this.t('console.ambulanceStatus.en_route_to_hospital')],
+        data: [fleetMap.idle, fleetMap.en_route_to_pickup, fleetMap.en_route_to_hospital],
+        colors: ['#64748b', '#fbbf24', '#f3c24e'],
+      };
+      const topBeds = [...hdash].sort((a, b) => (b.available_general_beds + b.available_icu_beds) - (a.available_general_beds + a.available_icu_beds)).slice(0, 6);
+      this.dash.beds = {
+        labels: topBeds.map(h => h.name.split(',')[0].slice(0, 16)),
+        datasets: [
+          { label: this.t('console.beds.general'), data: topBeds.map(h => h.available_general_beds), color: '#f3c24e' },
+          { label: this.t('console.beds.icu'), data: topBeds.map(h => h.available_icu_beds), color: '#7e8cf8' },
+        ],
+      };
+      this.dash.feed = [...cases]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6)
+        .map(c => ({ icon: 'case', title: (c.patient_name || this.t('console.common.unknownPatient')) + ' · ' + this.statusLabel(c.status), meta: this.t('console.case.pathLabel') + ' ' + c.creation_path + ' · ' + this.ago(c.created_at) }));
+      this.dash.lowBeds = [...hdash].filter(h => h.available_general_beds <= 2 || h.available_icu_beds === 0)
+        .slice(0, 5).map(h => ({ name: h.name.split(',')[0], gen: h.available_general_beds, icu: h.available_icu_beds }));
+    },
+
+    async _dashHospital() {
+      const hid = this.session.hospital_id;
+      const [hdashAll, patients, staff, inventory, cases] = await Promise.all([
+        this.api('GET', '/hospitals/dashboard', null, { quiet: true }).catch(() => []),
+        this.api('GET', hid ? `/hospitals/${hid}/patients` : '/patients', null, { quiet: true }).catch(() => []),
+        this.api('GET', hid ? `/hospitals/${hid}/staff` : '/staff', null, { quiet: true }).catch(() => []),
+        this.api('GET', hid ? `/hospitals/${hid}/inventory` : '/inventory', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/cases', null, { quiet: true }).catch(() => []),
+      ]);
+      const hd = hdashAll.find(h => h.hospital_id === hid) || hdashAll[0] || {};
+      const waiting = patients.filter(p => p.status === 'waiting').length;
+      const admitted = patients.filter(p => p.status === 'admitted').length;
+      const onDuty = staff.filter(s => s.on_duty_status === 'on_duty').length;
+      const lowStock = inventory.filter(i => i.is_low_stock).length;
+      const incoming = cases.filter(c => !['ADMITTED', 'DISCHARGED'].includes(c.status)).length;
+
+      this.dash.hospitalName = hd.name;
+      this.dash.kpis = [
+        { k: 'beds', label: this.t('console.beds.general'), value: hd.available_general_beds ?? '—', sub: (hd.total_general_beds ?? 0) + ' ' + this.t('console.dash.subTotalBeds') },
+        { k: 'beds', label: this.t('console.beds.icu'), value: hd.available_icu_beds ?? '—', sub: (hd.total_icu_beds ?? 0) + ' ' + this.t('console.dash.subTotalBeds') },
+        { k: 'census', label: this.t('console.dash.kpiWaiting'), value: waiting, sub: admitted + ' ' + this.t('console.dash.subAdmitted') },
+        { k: 'incoming', label: this.t('console.dash.kpiIncoming'), value: incoming, sub: this.t('console.dash.subInTransit') },
+        { k: 'staff', label: this.t('console.dash.kpiOnDuty'), value: onDuty, sub: staff.length + ' ' + this.t('console.dash.subRostered') },
+        { k: 'inventory', label: this.t('console.dash.kpiLowStock'), value: lowStock, sub: inventory.length + ' ' + this.t('console.dash.subItems') },
+      ];
+      const occGen = Math.max(0, (hd.total_general_beds || 0) - (hd.available_general_beds || 0) - (hd.reserved_general_beds || 0));
+      this.dash.bedRing = {
+        labels: [this.t('console.dash.bedFree'), this.t('console.dash.bedReserved'), this.t('console.dash.bedOccupied')],
+        data: [(hd.available_general_beds || 0) + (hd.available_icu_beds || 0), (hd.reserved_general_beds || 0) + (hd.reserved_icu_beds || 0), occGen + Math.max(0, (hd.total_icu_beds || 0) - (hd.available_icu_beds || 0) - (hd.reserved_icu_beds || 0))],
+        colors: ['#4ade80', '#fbbf24', '#64748b'],
+      };
+      const pc = { waiting: 0, admitted: 0, discharged: 0 };
+      for (const p of patients) pc[p.status] = (pc[p.status] || 0) + 1;
+      this.dash.census = {
+        labels: [this.t('console.status.waiting'), this.t('console.status.admitted'), this.t('console.status.discharged')],
+        datasets: [{ label: this.t('console.census.title'), data: [pc.waiting, pc.admitted, pc.discharged], color: '#7e8cf8' }],
+      };
+      const sc = { on_duty: 0, off_duty: 0, on_leave: 0 };
+      for (const s of staff) sc[s.on_duty_status] = (sc[s.on_duty_status] || 0) + 1;
+      this.dash.staff = {
+        labels: [this.t('console.status.on_duty'), this.t('console.status.off_duty'), this.t('console.status.on_leave')],
+        data: [sc.on_duty, sc.off_duty, sc.on_leave],
+        colors: ['#4ade80', '#64748b', '#fbbf24'],
+      };
+      this.dash.feed = cases.filter(c => !['ADMITTED', 'DISCHARGED'].includes(c.status)).slice(0, 6)
+        .map(c => ({ icon: 'incoming', title: (c.patient_name || this.t('console.common.unknownPatient')) + ' · ' + this.statusLabel(c.status), meta: this.t('console.case.pathLabel') + ' ' + c.creation_path }));
+      this.dash.lowStockItems = inventory.filter(i => i.is_low_stock).slice(0, 6)
+        .map(i => ({ name: i.item_name, qty: i.quantity_on_hand + ' ' + i.unit }));
+    },
+
+    async _dashControl() {
+      const [flags, ambulances, conflicts, rateFlags] = await Promise.all([
+        this.api('GET', '/control-room/flags?include_resolved=true', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/ambulances', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/bed-locks/conflicts', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/rate-limit-flags', null, { quiet: true }).catch(() => []),
+      ]);
+      const open = flags.filter(f => f.status !== 'resolved').length;
+      const resolved = flags.filter(f => f.status === 'resolved').length;
+      const stale = ambulances.filter(a => a.has_stale_gps_flag).length;
+      const dispatched = ambulances.filter(a => a.status !== 'idle').length;
+      this.dash.kpis = [
+        { k: 'flag', label: this.t('console.dash.kpiOpenFlags'), value: open, sub: resolved + ' ' + this.t('console.dash.subResolved') },
+        { k: 'ambulance', label: this.t('console.dash.kpiTracked'), value: dispatched, sub: ambulances.length + ' ' + this.t('console.dash.subFleet') },
+        { k: 'map', label: this.t('console.map.staleGps'), value: stale, sub: this.t('console.dash.subGpsFix') },
+        { k: 'beds', label: this.t('console.dash.kpiConflicts'), value: conflicts.length, sub: this.t('console.dash.subBedContention') },
+        { k: 'oversight', label: this.t('console.dash.kpiRateFlags'), value: rateFlags.length, sub: this.t('console.dash.subFlagged') },
+        { k: 'case', label: this.t('console.dash.kpiFlagsAllTime'), value: flags.length, sub: this.t('console.dash.subAllTime') },
+      ];
+      const ft = { anomaly: 0, conflict: 0, reconciliation: 0 };
+      for (const f of flags) ft[f.flag_type] = (ft[f.flag_type] || 0) + 1;
+      this.dash.flagTypes = {
+        labels: ['anomaly', 'conflict', 'reconciliation'],
+        data: [ft.anomaly, ft.conflict, ft.reconciliation],
+        colors: ['#fbbf24', '#fb7185', '#58b6f0'],
+      };
+      const fleetMap = { idle: 0, en_route_to_pickup: 0, en_route_to_hospital: 0 };
+      for (const a of ambulances) fleetMap[a.status] = (fleetMap[a.status] || 0) + 1;
+      this.dash.fleet = {
+        labels: [this.t('console.ambulanceStatus.idle'), this.t('console.ambulanceStatus.en_route_to_pickup'), this.t('console.ambulanceStatus.en_route_to_hospital')],
+        data: [fleetMap.idle, fleetMap.en_route_to_pickup, fleetMap.en_route_to_hospital],
+        colors: ['#64748b', '#fbbf24', '#f3c24e'],
+      };
+      this.dash.feed = [...flags].slice(0, 7).map(f => ({
+        icon: 'flag', title: this.t('console.flags.title') + ' · ' + f.flag_type + ' — ' + f.status,
+        meta: (f.details || '').slice(0, 80),
+      }));
+    },
+
+    async _dashBlood() {
+      const bid = this.session.blood_bank_id;
+      const [holds, banks] = await Promise.all([
+        this.api('GET', bid ? `/blood-banks/${bid}/holds` : '/blood-bank-holds', null, { quiet: true }).catch(() => []),
+        this.api('GET', '/blood-banks', null, { quiet: true }).catch(() => []),
+      ]);
+      const pending = holds.filter(h => h.hold_status === 'pending');
+      const confirmed = holds.filter(h => h.hold_status === 'confirmed').length;
+      const rejected = holds.filter(h => h.hold_status === 'rejected').length;
+      const units = pending.reduce((a, h) => a + (h.units_requested || 0), 0);
+      this.dash.kpis = [
+        { k: 'holds', label: this.t('console.dash.kpiPending'), value: pending.length, sub: units + ' ' + this.t('console.unit.units') },
+        { k: 'case', label: this.t('console.status.confirmed'), value: confirmed, sub: this.t('console.dash.subApproved') },
+        { k: 'flag', label: this.t('console.status.rejected'), value: rejected, sub: this.t('console.dash.subDeclined') },
+        { k: 'inventory', label: this.t('console.dash.kpiTotalHolds'), value: holds.length, sub: this.t('console.dash.subAllTime') },
+      ];
+      this.dash.holdStatus = {
+        labels: [this.t('console.status.pending'), this.t('console.status.confirmed'), this.t('console.status.rejected')],
+        data: [pending.length, confirmed, rejected],
+        colors: ['#fbbf24', '#4ade80', '#fb7185'],
+      };
+      const bank = banks.find(b => b.blood_bank_id === bid) || banks[0];
+      const stock = (bank && bank.stock_by_group) || {};
+      const groups = Object.keys(stock);
+      this.dash.stock = groups.length ? {
+        labels: groups,
+        datasets: [{ label: this.t('console.dash.unitsInStock'), data: groups.map(g => stock[g]), color: '#fb7185' }],
+      } : null;
+      this.dash.feed = [...holds]
+        .sort((a, b) => new Date(b.requested_at) - new Date(a.requested_at)).slice(0, 7)
+        .map(h => ({ icon: 'holds', title: (h.blood_group || 'O-') + ' × ' + h.units_requested + ' · ' + h.hold_status, meta: this.t('console.holds.forHospital') + ' ' + h.hospital_id + ' · ' + this.ago(h.requested_at) }));
+    },
+
+    async _dashHelper() {
+      const cases = await this.api('GET', '/cases', null, { quiet: true }).catch(() => []);
+      const active = this._activeCases(cases);
+      const done = cases.filter(c => c.status === 'DISCHARGED').length;
+      const wk = cases.filter(c => c.created_at && (Date.now() - new Date(c.created_at)) < 7 * 864e5).length;
+      this.dash.kpis = [
+        { k: 'case', label: this.t('console.dash.kpiMyCases'), value: cases.length, sub: this.t('console.dash.subAllTime') },
+        { k: 'ambulance', label: this.t('console.cases.statActive'), value: active.length, sub: this.t('console.dash.subInTransit') },
+        { k: 'case', label: this.t('console.cases.statDone'), value: done, sub: this.t('console.dash.subCompleted') },
+        { k: 'dashboard', label: this.t('console.dash.kpiThisWeek'), value: wk, sub: this.t('console.dash.subLast7') },
+      ];
+      this.dash.trend = this._bucketByDay(cases, 'created_at', 10);
+      this.dash.status = this._statusBreakdown(cases);
+      this.dash.activeCase = active[0] || null;
+      this.dash.feed = [...cases].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6)
+        .map(c => ({ icon: 'case', title: (c.patient_name || this.t('console.common.unknownPatient')) + ' · ' + this.statusLabel(c.status), meta: this.ago(c.created_at), caseId: c.case_id }));
+    },
+
+    dashLeg(spec) {
+      if (!spec || !spec.labels) return [];
+      const cols = spec.colors || (typeof GLCharts !== 'undefined' ? GLCharts.SERIES : []);
+      return spec.labels.map((label, i) => ({ label, color: cols[i % cols.length], value: (spec.data || [])[i] }));
+    },
+    dashHasData(spec) { return !!spec && (spec.data || []).some(v => v > 0); },
+    _renderDashCharts() {
+      if (typeof GLCharts === 'undefined' || !GLCharts.ready()) return;
+      // Several role blocks share canvas ids (dashFleet, dashStatus, dashTrend)
+      // and all sit in the DOM under x-show. Scope the lookup to the ONE
+      // .gl-dash-grid that's actually visible so charts never render into a
+      // display:none canvas (0×0 → broken).
+      const grids = [...document.querySelectorAll('.gl-dash-grid')];
+      const root = grids.find((el) => el.offsetParent !== null) || document;
+      const $ = (id) => root.querySelector('#' + id);
+      if (this.dash.trend && $('dashTrend')) GLCharts.area($('dashTrend'), { labels: this.dash.trend.labels, data: this.dash.trend.data });
+      if (this.dash.status && $('dashStatus')) GLCharts.donut($('dashStatus'), this.dash.status);
+      if (this.dash.fleet && $('dashFleet')) GLCharts.donut($('dashFleet'), this.dash.fleet);
+      if (this.dash.beds && $('dashBeds')) GLCharts.bars($('dashBeds'), this.dash.beds);
+      if (this.dash.bedRing && $('dashBedRing')) GLCharts.donut($('dashBedRing'), this.dash.bedRing);
+      if (this.dash.census && $('dashCensus')) GLCharts.bars($('dashCensus'), this.dash.census);
+      if (this.dash.staff && $('dashStaff')) GLCharts.donut($('dashStaff'), this.dash.staff);
+      if (this.dash.flagTypes && $('dashFlagTypes')) GLCharts.donut($('dashFlagTypes'), this.dash.flagTypes);
+      if (this.dash.holdStatus && $('dashHoldStatus')) GLCharts.donut($('dashHoldStatus'), this.dash.holdStatus);
+      if (this.dash.stock && $('dashStock')) GLCharts.bars($('dashStock'), this.dash.stock);
+    },
+
     // ─────────────────────────── cases (helper / admin / hospital list) ───────────────────────────
     async loadCases() {
       try { this.cases = await this.api('GET', '/cases'); } catch { this.cases = []; }
     },
 
+    // next-of-kin must be a valid Indian mobile — same regex the backend enforces
+    nokValid() { return /^[6-9]\d{9}$/.test((this.nc.nok || '').trim()); },
     async createCase() {
+      if (!this.nokValid()) { this.toast(this.t('console.cases.nokInvalid'), 'error'); return; }
       try {
         const c = await this.api('POST', '/cases', {
           next_of_kin_phone_number: this.nc.nok.trim(),
@@ -696,11 +1022,15 @@ document.addEventListener('alpine:init', () => {
       } catch {}
     },
 
-    // Both paths: the helper taps one of the 3 cost-class hospitals shown,
-    // after asking the family inside the ambulance which class they'd like.
-    // Family never selects — see ranking-distance-over-scheme / this session's
-    // "helper picks a class" redesign.
+    // Hospital selection is helper-only on both paths — the helper asks the
+    // family which of the 3 cost classes they'd like, then taps it. The
+    // family's case view stays read-only. (helper-driven-hospital-classes.)
+    canPickHospital() {
+      if (!this.ac.case || this.ac.case.selected_hospital_id) return false;
+      return this.viewRole === 'helper' || this.viewRole === 'admin';
+    },
     async selectHospitalClass(hospitalId) {
+      if (!this.canPickHospital()) return;
       try {
         const path = this.ac.case?.creation_path === 'A' ? 'select-hospital' : 'confirm-hospital';
         await this.api('POST', `/cases/${this.activeCase}/${path}`, {
@@ -1007,6 +1337,19 @@ document.addEventListener('alpine:init', () => {
     },
 
     // ─────────────────────────── hospital: incoming case ───────────────────────────
+    // The incoming list: newest first, still-in-transit cases before closed
+    // ones, and ADMITTED/DISCHARGED hidden unless the receptionist ticks
+    // "show closed" (a hospital with a busy history would otherwise drown the
+    // handful of cases that actually need attention right now).
+    hospIncomingList() {
+      const closed = new Set(['ADMITTED', 'DISCHARGED']);
+      const rows = (this.cases || []).filter(c => this.incomingShowClosed || !closed.has(c.status));
+      return rows.slice().sort((a, b) => {
+        const ac = closed.has(a.status) ? 1 : 0, bc = closed.has(b.status) ? 1 : 0;
+        if (ac !== bc) return ac - bc;
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      });
+    },
     async openHospCase(id, { keepAdmit = false } = {}) {
       const wasAdmit = keepAdmit && this.hc.admitOk;
       this.hc = { admitOk: wasAdmit };
@@ -1016,6 +1359,12 @@ document.addEventListener('alpine:init', () => {
         this.hc.notes = await this.api('GET', `/cases/${id}/notes`, null, { quiet: true }).catch(() => []);
         this.hc.prep = await this.api('GET', `/cases/${id}/prep-actions`, null, { quiet: true }).catch(() => null);
         this.scan.caseId = id;
+        // the detail panel renders above the list — pull it into view so a
+        // "Manage" tap is unmistakably doing something (setTimeout, not
+        // $nextTick — see the Alpine gotchas).
+        setTimeout(() => {
+          this.$refs.hospDetail?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 60);
       } catch {}
     },
     async confirmPrep(prepId) {

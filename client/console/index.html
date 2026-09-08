@@ -9,9 +9,10 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../theme.css" />
   <link rel="stylesheet" href="console.css" />
 </head>
@@ -20,29 +21,43 @@
   <div class="gl-console-bg" aria-hidden="true"></div>
 
   <!-- ─────────────────────────── top bar ─────────────────────────── -->
-  <header class="gl-topbar sticky top-0 z-20 relative">
-    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-4">
-      <a href="../index.html" class="font-semibold flex items-center gap-2">
-        <span class="text-lg leading-none" style="color:var(--gl-gold)">◆</span>
-        GoldenLine <span class="font-normal hidden sm:inline" style="color:var(--gl-ink-dim)">Operator Console</span>
+  <header class="gl-topbar sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3 sm:gap-5">
+      <a href="../index.html" class="flex items-center gap-2.5 shrink-0">
+        <span class="gl-brand-mark text-sm">G</span>
+        <span class="hidden sm:flex flex-col leading-tight">
+          <span class="font-semibold tracking-tight">GoldenLine</span>
+          <span class="text-[11px]" style="color:var(--gl-ink-faint)">Operator Console</span>
+        </span>
       </a>
 
-      <div class="ml-auto flex items-center gap-3 text-sm">
-        <span class="flex items-center gap-1.5" :class="apiUp ? 'text-emerald-700' : 'text-rose-700'">
-          <span class="w-1.5 h-1.5 rounded-full" :class="apiUp ? 'bg-emerald-400' : 'bg-rose-400'"></span>
-          <span x-text="apiUp ? t('console.apiOnline') : t('console.apiOffline')"></span>
+      <div class="hidden lg:flex items-center gap-2 ml-1 text-xs px-2.5 py-1.5 rounded-lg"
+           style="background:var(--gl-subtle-bg);border:1px solid var(--gl-hairline);color:var(--gl-ink-dim)">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4.5" width="14" height="12.5" rx="1.6"/><path d="M3 8h14M7 3v3M13 3v3"/></svg>
+        <span x-text="new Date().toLocaleDateString(lang === 'en' ? undefined : lang, {weekday:'long', day:'2-digit', month:'short', year:'numeric'})"></span>
+      </div>
+
+      <div class="ml-auto flex items-center gap-2.5 sm:gap-3 text-sm">
+        <span class="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg"
+              style="background:var(--gl-subtle-bg);border:1px solid var(--gl-hairline)">
+          <span class="gl-dot" :class="apiUp ? 'gl-dot-ok' : 'gl-dot-danger'"></span>
+          <span style="color:var(--gl-ink-dim)" x-text="apiUp ? t('console.apiOnline') : t('console.apiOffline')"></span>
         </span>
 
-        <select @change="setLang($event.target.value)" class="gl-select rounded-lg px-2 py-1 text-xs">
+        <select @change="setLang($event.target.value)" class="gl-select rounded-lg px-2 py-1.5 text-xs">
           <template x-for="opt in langOptions" :key="opt.code">
             <option :value="opt.code" :selected="lang === opt.code" x-text="opt.label"></option>
           </template>
         </select>
 
         <template x-if="session">
-          <div class="flex items-center gap-3">
-            <span class="hidden md:inline" style="color:var(--gl-ink-dim)"
-              x-text="(session.display_name || session.user_id) + ' · ' + roleLabel(viewRole)"></span>
+          <div class="flex items-center gap-2.5 pl-2.5 sm:pl-3" style="border-left:1px solid var(--gl-hairline)">
+            <span class="gl-brand-mark text-xs" style="background:linear-gradient(135deg,var(--gl-accent-soft),var(--gl-accent));color:#0d1119"
+                  x-text="(session.display_name || session.user_id || '?').replace(/[^A-Za-z0-9]/g,'').slice(0,2).toUpperCase()"></span>
+            <span class="hidden md:flex flex-col leading-tight">
+              <span class="text-xs font-medium" x-text="session.display_name || session.user_id"></span>
+              <span class="text-[11px]" style="color:var(--gl-ink-faint)" x-text="roleLabel(viewRole)"></span>
+            </span>
             <button @click="signOut()" class="gl-link text-xs" x-text="t('console.signOut')"></button>
           </div>
         </template>
@@ -65,38 +80,297 @@
 
   <!-- ─────────────────────────── main layout ─────────────────────────── -->
   <template x-if="session">
-  <div class="relative z-10 max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-[13rem_1fr] gap-6">
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-1 md:grid-cols-[15rem_1fr] gap-6 lg:gap-8">
 
     <!-- sidebar nav -->
-    <nav class="space-y-1">
+    <nav class="gl-rail space-y-1">
+      <div class="gl-eyebrow px-2 pb-2" x-text="roleLabel(viewRole)"></div>
       <template x-for="item in nav()" :key="item.key">
         <button @click="go(item.key)"
-          class="gl-nav-btn w-full text-left px-3 py-2 rounded-lg text-sm"
+          class="gl-nav-btn text-left"
           :class="screen === item.key && 'gl-nav-active'">
-          <span class="w-4 h-4 inline-flex" x-html="navIcon(item.key)"></span>
+          <span class="inline-flex" x-html="navIcon(item.key)"></span>
           <span x-text="item.label"></span>
         </button>
       </template>
-      <div class="pt-3 text-xs px-3 leading-relaxed" style="color:var(--gl-ink-faint)">
-        <span x-text="roleLabel(viewRole)"></span>
-        <template x-if="session?.hospital_id"><span> · <span x-text="session.hospital_id"></span></span></template>
-        <template x-if="session?.blood_bank_id"><span> · <span x-text="session.blood_bank_id"></span></span></template>
+      <div class="mt-4 pt-3 text-xs px-2 leading-relaxed" style="color:var(--gl-ink-faint);border-top:1px solid var(--gl-hairline)">
+        <template x-if="session?.hospital_id"><span class="gl-chip text-[11px] px-2 py-0.5" x-text="session.hospital_id"></span></template>
+        <template x-if="session?.blood_bank_id"><span class="gl-chip text-[11px] px-2 py-0.5" x-text="session.blood_bank_id"></span></template>
       </div>
     </nav>
 
     <!-- screen area -->
     <main class="min-w-0">
 
+      <!-- ═══════════════════════ DASHBOARD (per-role Overview) ═══════════════════════ -->
+      <section x-show="screen === 'dashboard'" x-transition.opacity.duration.150ms class="space-y-5">
+        <div class="flex items-end justify-between flex-wrap gap-3">
+          <div>
+            <div class="gl-eyebrow" x-text="t('console.dash.overview')"></div>
+            <h1 class="gl-page-title mt-1" x-text="dash.hospitalName || roleLabel(viewRole)"></h1>
+          </div>
+          <button @click="loadDashboard()" :disabled="loading"
+            class="gl-btn-secondary text-xs rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10a7 7 0 0 1 12-5l2 2M17 10a7 7 0 0 1-12 5l-2-2"/><path d="M17 3v4h-4M3 17v-4h4"/></svg>
+            <span x-text="t('console.dash.refresh')"></span>
+          </button>
+        </div>
+
+        <template x-if="!dash.ready">
+          <div class="flex items-center gap-2 py-16 justify-center text-sm" style="color:var(--gl-ink-faint)">
+            <span class="w-4 h-4 gl-spinner"></span> <span x-text="t('console.dash.loading')"></span>
+          </div>
+        </template>
+
+        <template x-if="dash.ready">
+        <div class="space-y-5">
+          <!-- KPI grid -->
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3"
+               :class="(dash.kpis||[]).length >= 6 ? 'lg:grid-cols-6' : 'lg:grid-cols-4'">
+            <template x-for="(k, i) in (dash.kpis || [])" :key="i">
+              <div class="gl-kpi gl-fade-up" :style="'animation-delay:' + (i * 40) + 'ms'">
+                <div class="gl-kpi-top">
+                  <span class="gl-kpi-label" x-text="k.label"></span>
+                  <span class="gl-kpi-ico" x-html="dashIcon(k.k)"></span>
+                </div>
+                <div class="gl-kpi-value" x-text="k.value"></div>
+                <div class="gl-kpi-sub" x-text="k.sub"></div>
+              </div>
+            </template>
+          </div>
+
+          <!-- ── ADMIN ── -->
+          <div x-show="viewRole === 'admin'" class="gl-dash-grid">
+            <div class="gl-widget gl-col-8">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.casesTrend')"></span>
+                <span class="text-xs" style="color:var(--gl-ink-faint)" x-text="t('console.dash.last14')"></span></div>
+              <div class="gl-widget-body"><div class="gl-chart-box" style="height:236px"><canvas id="dashTrend"></canvas></div></div>
+            </div>
+            <div class="gl-widget gl-col-4">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.casesByStatus')"></span></div>
+              <div class="gl-widget-body">
+                <div class="gl-chart-box" style="height:170px"><canvas id="dashStatus"></canvas></div>
+                <div class="gl-legend">
+                  <template x-for="l in dashLeg(dash.status)" :key="l.label">
+                    <span class="gl-legend-item"><span class="gl-legend-swatch" :style="'background:' + l.color"></span><span x-text="l.label + ' · ' + l.value"></span></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-4">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.fleetStatus')"></span></div>
+              <div class="gl-widget-body">
+                <div class="gl-chart-box" style="height:170px"><canvas id="dashFleet"></canvas></div>
+                <div class="gl-legend">
+                  <template x-for="l in dashLeg(dash.fleet)" :key="l.label">
+                    <span class="gl-legend-item"><span class="gl-legend-swatch" :style="'background:' + l.color"></span><span x-text="l.label + ' · ' + l.value"></span></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-8">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.bedsByHospital')"></span></div>
+              <div class="gl-widget-body"><div class="gl-chart-box" style="height:210px"><canvas id="dashBeds"></canvas></div></div>
+            </div>
+            <div class="gl-widget gl-col-6">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.recentActivity')"></span>
+                <button @click="go('cases')" class="gl-link text-xs" x-text="t('console.common.openArrow')"></button></div>
+              <div class="gl-widget-body gl-feed">
+                <template x-for="(f, i) in (dash.feed || [])" :key="i">
+                  <div class="gl-feed-item"><span class="gl-feed-ico" x-html="dashIcon(f.icon)"></span>
+                    <div class="gl-feed-main"><div class="gl-feed-title" x-text="f.title"></div><div class="gl-feed-meta" x-text="f.meta"></div></div></div>
+                </template>
+                <p x-show="!(dash.feed||[]).length" class="text-xs py-4" style="color:var(--gl-ink-faint)" x-text="t('console.common.none')"></p>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-6">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.hospitalsAttention')"></span>
+                <button @click="go('beds')" class="gl-link text-xs" x-text="t('console.common.openArrow')"></button></div>
+              <div class="gl-widget-body gl-feed">
+                <template x-for="(h, i) in (dash.lowBeds || [])" :key="i">
+                  <div class="gl-feed-item"><span class="gl-feed-ico" x-html="dashIcon('beds')"></span>
+                    <div class="gl-feed-main"><div class="gl-feed-title" x-text="h.name"></div>
+                    <div class="gl-feed-meta"><span x-text="h.gen"></span> <span x-text="t('console.unit.gen')"></span> · <span x-text="h.icu"></span> <span x-text="t('console.unit.icuFree')"></span></div></div></div>
+                </template>
+                <p x-show="!(dash.lowBeds||[]).length" class="text-xs py-4" style="color:var(--gl-ink-faint)" x-text="t('console.dash.allHealthy')"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── HOSPITAL ── -->
+          <div x-show="viewRole === 'hospital'" class="gl-dash-grid">
+            <div class="gl-widget gl-col-4">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.bedMix')"></span></div>
+              <div class="gl-widget-body">
+                <div class="gl-chart-box" style="height:180px"><canvas id="dashBedRing"></canvas></div>
+                <div class="gl-legend">
+                  <template x-for="l in dashLeg(dash.bedRing)" :key="l.label">
+                    <span class="gl-legend-item"><span class="gl-legend-swatch" :style="'background:' + l.color"></span><span x-text="l.label + ' · ' + l.value"></span></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-8">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.censusByStatus')"></span></div>
+              <div class="gl-widget-body"><div class="gl-chart-box" style="height:200px"><canvas id="dashCensus"></canvas></div></div>
+            </div>
+            <div class="gl-widget gl-col-4">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.staffStatus')"></span></div>
+              <div class="gl-widget-body">
+                <div class="gl-chart-box" style="height:170px"><canvas id="dashStaff"></canvas></div>
+                <div class="gl-legend">
+                  <template x-for="l in dashLeg(dash.staff)" :key="l.label">
+                    <span class="gl-legend-item"><span class="gl-legend-swatch" :style="'background:' + l.color"></span><span x-text="l.label + ' · ' + l.value"></span></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-4">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.incomingCases')"></span>
+                <button @click="go('incoming')" class="gl-link text-xs" x-text="t('console.common.openArrow')"></button></div>
+              <div class="gl-widget-body gl-feed">
+                <template x-for="(f, i) in (dash.feed || [])" :key="i">
+                  <div class="gl-feed-item"><span class="gl-feed-ico" x-html="dashIcon(f.icon)"></span>
+                    <div class="gl-feed-main"><div class="gl-feed-title" x-text="f.title"></div><div class="gl-feed-meta" x-text="f.meta"></div></div></div>
+                </template>
+                <p x-show="!(dash.feed||[]).length" class="text-xs py-4" style="color:var(--gl-ink-faint)" x-text="t('console.incoming.empty')"></p>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-4">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.lowStock')"></span>
+                <button @click="go('inventory')" class="gl-link text-xs" x-text="t('console.common.openArrow')"></button></div>
+              <div class="gl-widget-body gl-feed">
+                <template x-for="(it, i) in (dash.lowStockItems || [])" :key="i">
+                  <div class="gl-feed-item"><span class="gl-feed-ico" x-html="dashIcon('inventory')"></span>
+                    <div class="gl-feed-main"><div class="gl-feed-title" x-text="it.name"></div><div class="gl-feed-meta" x-text="it.qty"></div></div>
+                    <span class="gl-badge gl-badge-rose" x-text="t('console.inventory.lowStock')"></span></div>
+                </template>
+                <p x-show="!(dash.lowStockItems||[]).length" class="text-xs py-4" style="color:var(--gl-ink-faint)" x-text="t('console.dash.stockOk')"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── CONTROL ROOM ── -->
+          <div x-show="viewRole === 'controlroom'" class="gl-dash-grid">
+            <div class="gl-widget gl-col-6">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.flagsByType')"></span></div>
+              <div class="gl-widget-body">
+                <div class="gl-chart-box" style="height:180px"><canvas id="dashFlagTypes"></canvas></div>
+                <div class="gl-legend">
+                  <template x-for="l in dashLeg(dash.flagTypes)" :key="l.label">
+                    <span class="gl-legend-item"><span class="gl-legend-swatch" :style="'background:' + l.color"></span><span x-text="l.label + ' · ' + l.value"></span></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-6">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.fleetStatus')"></span></div>
+              <div class="gl-widget-body">
+                <div class="gl-chart-box" style="height:180px"><canvas id="dashFleet"></canvas></div>
+                <div class="gl-legend">
+                  <template x-for="l in dashLeg(dash.fleet)" :key="l.label">
+                    <span class="gl-legend-item"><span class="gl-legend-swatch" :style="'background:' + l.color"></span><span x-text="l.label + ' · ' + l.value"></span></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-12">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.recentFlags')"></span>
+                <button @click="go('flags')" class="gl-link text-xs" x-text="t('console.common.openArrow')"></button></div>
+              <div class="gl-widget-body gl-feed">
+                <template x-for="(f, i) in (dash.feed || [])" :key="i">
+                  <div class="gl-feed-item"><span class="gl-feed-ico" x-html="dashIcon(f.icon)"></span>
+                    <div class="gl-feed-main"><div class="gl-feed-title" x-text="f.title"></div><div class="gl-feed-meta" x-text="f.meta"></div></div></div>
+                </template>
+                <p x-show="!(dash.feed||[]).length" class="text-xs py-4" style="color:var(--gl-ink-faint)" x-text="t('console.flags.empty')"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── BLOOD BANK ── -->
+          <div x-show="viewRole === 'bloodbank'" class="gl-dash-grid">
+            <div class="gl-widget gl-col-4">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.holdsByStatus')"></span></div>
+              <div class="gl-widget-body">
+                <div class="gl-chart-box" style="height:180px"><canvas id="dashHoldStatus"></canvas></div>
+                <div class="gl-legend">
+                  <template x-for="l in dashLeg(dash.holdStatus)" :key="l.label">
+                    <span class="gl-legend-item"><span class="gl-legend-swatch" :style="'background:' + l.color"></span><span x-text="l.label + ' · ' + l.value"></span></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-8">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.stockByGroup')"></span></div>
+              <div class="gl-widget-body">
+                <div x-show="dash.stock" class="gl-chart-box" style="height:190px"><canvas id="dashStock"></canvas></div>
+                <p x-show="!dash.stock" class="text-xs py-8 text-center" style="color:var(--gl-ink-faint)" x-text="t('console.dash.noStockData')"></p>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-12">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.recentHolds')"></span>
+                <button @click="go('holds')" class="gl-link text-xs" x-text="t('console.common.openArrow')"></button></div>
+              <div class="gl-widget-body gl-feed">
+                <template x-for="(f, i) in (dash.feed || [])" :key="i">
+                  <div class="gl-feed-item"><span class="gl-feed-ico" x-html="dashIcon(f.icon)"></span>
+                    <div class="gl-feed-main"><div class="gl-feed-title" x-text="f.title"></div><div class="gl-feed-meta" x-text="f.meta"></div></div></div>
+                </template>
+                <p x-show="!(dash.feed||[]).length" class="text-xs py-4" style="color:var(--gl-ink-faint)" x-text="t('console.holds.empty')"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── HELPER ── -->
+          <div x-show="viewRole === 'helper'" class="gl-dash-grid">
+            <div class="gl-widget gl-col-8">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.casesTrend')"></span></div>
+              <div class="gl-widget-body"><div class="gl-chart-box" style="height:210px"><canvas id="dashTrend"></canvas></div></div>
+            </div>
+            <div class="gl-widget gl-col-4">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.casesByStatus')"></span></div>
+              <div class="gl-widget-body">
+                <div class="gl-chart-box" style="height:150px"><canvas id="dashStatus"></canvas></div>
+                <div class="gl-legend">
+                  <template x-for="l in dashLeg(dash.status)" :key="l.label">
+                    <span class="gl-legend-item"><span class="gl-legend-swatch" :style="'background:' + l.color"></span><span x-text="l.label + ' · ' + l.value"></span></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="gl-widget gl-col-6" x-show="dash.activeCase">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.activeCase')"></span></div>
+              <div class="gl-widget-body">
+                <div class="font-medium" x-text="dash.activeCase?.patient_name || t('console.common.unknownPatient')"></div>
+                <span class="gl-badge mt-1.5 inline-flex" :class="statusClass(dash.activeCase?.status)" x-text="statusLabel(dash.activeCase?.status)"></span>
+                <button @click="openCase(dash.activeCase.case_id)" class="gl-btn-primary rounded-lg px-3 py-1.5 text-xs mt-3 block" x-text="t('console.dash.openCase')"></button>
+              </div>
+            </div>
+            <div class="gl-widget" :class="dash.activeCase ? 'gl-col-6' : 'gl-col-12'">
+              <div class="gl-widget-head"><span class="gl-widget-title" x-text="t('console.dash.recentActivity')"></span>
+                <button @click="go('cases')" class="gl-link text-xs" x-text="t('console.common.openArrow')"></button></div>
+              <div class="gl-widget-body gl-feed">
+                <template x-for="(f, i) in (dash.feed || [])" :key="i">
+                  <button @click="f.caseId && openCase(f.caseId)" class="gl-feed-item text-left w-full"><span class="gl-feed-ico" x-html="dashIcon(f.icon)"></span>
+                    <div class="gl-feed-main"><div class="gl-feed-title" x-text="f.title"></div><div class="gl-feed-meta" x-text="f.meta"></div></div></button>
+                </template>
+                <p x-show="!(dash.feed||[]).length" class="text-xs py-4" style="color:var(--gl-ink-faint)" x-text="t('console.cases.empty')"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        </template>
+      </section>
+
       <!-- ═══════════ HELPER / ADMIN: case list ═══════════ -->
       <section x-show="screen === 'cases'" x-transition.opacity.duration.150ms class="space-y-4">
         <div class="flex items-center justify-between">
-          <h1 class="text-xl font-semibold" x-text="t('console.cases.heading')"></h1>
+          <h1 class="gl-page-title" x-text="t('console.cases.heading')"></h1>
           <button x-show="viewRole === 'helper'" @click="newCaseOpen = !newCaseOpen"
             class="gl-btn-primary text-sm rounded-lg px-3 py-1.5" x-text="t('console.cases.newCase')"></button>
         </div>
 
         <div x-show="newCaseOpen" x-transition class="gl-card p-4 space-y-3">
-          <h3 class="font-medium" x-text="t('console.cases.startTitle')"></h3>
+          <h3 class="gl-section-title" x-text="t('console.cases.startTitle')"></h3>
           <div class="grid grid-cols-2 gap-3 text-sm">
             <label class="block" style="color:var(--gl-ink-dim)"><span x-text="t('console.cases.patientName')"></span>
               <input x-model="nc.name" class="gl-input mt-1 w-full rounded-lg px-2.5 py-1.5" :placeholder="t('console.cases.optional')" /></label>
@@ -107,9 +381,13 @@
                 <option value="male" x-text="t('console.gender.male')"></option><option value="female" x-text="t('console.gender.female')"></option><option value="other" x-text="t('console.gender.other')"></option><option value="unknown" x-text="t('console.gender.unknown')"></option>
               </select></label>
             <label class="block" style="color:var(--gl-ink-dim)"><span x-text="t('console.cases.nokPhone')"></span>
-              <input x-model="nc.nok" class="gl-input mt-1 w-full rounded-lg px-2.5 py-1.5" /></label>
+              <input x-model="nc.nok" inputmode="numeric" maxlength="10"
+                class="gl-input mt-1 w-full rounded-lg px-2.5 py-1.5"
+                :style="nc.nok && !nokValid() ? 'border-color:var(--gl-danger)' : ''" />
+              <span x-show="nc.nok && !nokValid()" class="text-xs mt-1 block" style="color:var(--gl-danger)" x-text="t('console.cases.nokInvalid')"></span>
+            </label>
           </div>
-          <button @click="createCase()" :disabled="loading"
+          <button @click="createCase()" :disabled="loading || !nokValid()"
             class="gl-btn-primary text-sm rounded-lg px-3 py-1.5" x-text="t('console.cases.createCase')"></button>
         </div>
 
@@ -140,7 +418,7 @@
         <div class="gl-card p-4">
           <div class="flex items-start justify-between">
             <div>
-              <h1 class="text-xl font-semibold" x-text="ac.case?.patient_name || t('console.common.patientUnknown')"></h1>
+              <h1 class="gl-page-title" x-text="ac.case?.patient_name || t('console.common.patientUnknown')"></h1>
               <p class="text-sm mt-0.5" style="color:var(--gl-ink-dim)">
                 <span x-text="t('console.case.pathLabel') + ' ' + ac.case?.creation_path"></span>
                 <template x-if="ac.case?.patient_approx_age || ac.case?.patient_gender">
@@ -179,8 +457,8 @@
             </span>
           </template>
           <span x-show="!geo.coords && geo.supported && !geo.error" x-text="t('console.geo.waiting')"></span>
-          <span x-show="!geo.supported" style="color:#92400e" x-text="t('console.geo.unsupported')"></span>
-          <span x-show="geo.error" style="color:#92400e" x-text="t('console.geo.denied')"></span>
+          <span x-show="!geo.supported" style="color:var(--gl-warn)" x-text="t('console.geo.unsupported')"></span>
+          <span x-show="geo.error" style="color:var(--gl-warn)" x-text="t('console.geo.denied')"></span>
         </div>
 
         <!-- which ambulance is coming + its live position (family/admin, not helper) -->
@@ -189,7 +467,7 @@
           <span x-text="t('console.case.ambulanceLabel')"></span>
           <span class="" x-text="ac.ambulance?.vehicle_number + ' · ' + ac.ambulance?.driver_name"></span>
           <span x-show="ac.ambulance?.gps_timestamp" style="color:var(--gl-ink-faint)" x-text="'(' + t('console.beds.lastSynced') + ' ' + fmtTime(ac.ambulance?.gps_timestamp) + ')'"></span>
-          <span x-show="ac.ambulance?.latitude == null" style="color:#92400e" x-text="t('console.case.ambulanceNoFixYet')"></span>
+          <span x-show="ac.ambulance?.latitude == null" style="color:var(--gl-warn)" x-text="t('console.case.ambulanceNoFixYet')"></span>
         </div>
 
         <!-- case map: candidate hospitals before selection, route line after.
@@ -202,8 +480,8 @@
 
         <!-- step 1: symptoms -->
         <div class="gl-card p-4">
-          <h3 class="font-medium flex items-center gap-2">
-            <span x-text="ac.assessment ? '✓' : '1'" :style="ac.assessment ? 'color:var(--gl-gold-soft)' : 'color:var(--gl-ink-faint)'"></span>
+          <h3 class="gl-section-title flex items-center gap-2">
+            <span class="gl-step-num" :class="ac.assessment && 'is-done'" x-text="ac.assessment ? '✓' : '1'"></span>
             <span x-text="t('console.case.step1Title')"></span>
           </h3>
           <template x-if="!ac.assessment || editSymptoms">
@@ -230,7 +508,7 @@
 
               <div class="pt-2" style="border-top:1px solid var(--gl-hairline)">
                 <template x-if="voice.matches.length">
-                  <div class="mb-2 text-xs p-2 rounded-lg" style="background:rgba(15,23,42,.04)">
+                  <div class="mb-2 text-xs p-2 rounded-lg" style="background:var(--gl-subtle-bg)">
                     <div style="color:var(--gl-ink-faint)" x-text="t('console.voice.heardLabel')"></div>
                     <p class="mt-0.5" style="color:var(--gl-ink)" x-html="highlightedHeardSnapshot()"></p>
                   </div>
@@ -260,7 +538,7 @@
 
         <!-- case updates: append-only follow-up notes, added any time during the case -->
         <div class="gl-card p-4" x-show="ac.assessment">
-          <h3 class="font-medium flex items-center gap-2">
+          <h3 class="gl-section-title flex items-center gap-2">
             <span x-text="t('console.case.updatesTitle')"></span>
             <span class="text-xs font-normal" style="color:var(--gl-ink-faint)" x-text="notes.length ? '(' + notes.length + ')' : ''"></span>
           </h3>
@@ -281,7 +559,7 @@
 
           <ul class="mt-3 space-y-2 text-sm">
             <template x-for="n in notes" :key="n.case_note_id">
-              <li class="p-2 rounded-lg" style="background:rgba(15,23,42,.035)">
+              <li class="p-2 rounded-lg" style="background:var(--gl-subtle-bg)">
                 <div class="text-xs mb-0.5" style="color:var(--gl-ink-faint)" x-text="n.author_id + ' · ' + fmtTime(n.created_at)"></div>
                 <p style="color:var(--gl-ink)" x-html="noteHtml(n)"></p>
               </li>
@@ -292,8 +570,8 @@
 
         <!-- step 2: ranking + selection — 3 cost classes, helper picks after asking the family -->
         <div class="gl-card p-4" x-show="ac.assessment">
-          <h3 class="font-medium flex items-center gap-2">
-            <span x-text="ac.case?.selected_hospital_id ? '✓' : '2'" :style="ac.case?.selected_hospital_id ? 'color:var(--gl-gold-soft)' : 'color:var(--gl-ink-faint)'"></span>
+          <h3 class="gl-section-title flex items-center gap-2">
+            <span class="gl-step-num" :class="ac.case?.selected_hospital_id && 'is-done'" x-text="ac.case?.selected_hospital_id ? '✓' : '2'"></span>
             <span x-text="t('console.case.step2Title')"></span>
           </h3>
           <p class="text-xs mt-1" style="color:var(--gl-ink-faint)" x-text="ac.ranking?.explanation"></p>
@@ -302,34 +580,39 @@
             <span :style="ac.ranking?.distance_source === 'live' ? 'color:var(--gl-gold-soft)' : 'color:var(--gl-ink-faint)'"
               x-text="ac.ranking?.distance_source === 'live' ? t('console.case.distanceLive') : t('console.case.distanceEstimated')"></span>
           </p>
-          <p x-show="viewRole !== 'family' && !ac.case?.selected_hospital_id" class="text-xs mt-1" style="color:var(--gl-gold-soft)" x-text="t('console.case.classesHint')"></p>
+          <p x-show="canPickHospital()" class="text-xs mt-1" style="color:var(--gl-gold-soft)" x-text="t('console.case.classesHint')"></p>
+          <p x-show="viewRole === 'family' && !ac.ranking && ac.case && !ac.case.selected_hospital_id" class="text-xs mt-2 flex items-center gap-2" style="color:var(--gl-ink-dim)">
+            <span class="w-3 h-3 gl-spinner"></span><span x-text="t('console.case.familyAssessing')"></span></p>
           <div class="mt-3 grid sm:grid-cols-3 gap-3">
             <template x-for="cls in ['economical','moderate','expensive']" :key="cls">
-              <div class="rounded-lg p-3 text-sm border flex flex-col gap-1.5"
-                :style="ac.ranking?.classes?.[cls] && ac.case?.selected_hospital_id === ac.ranking.classes[cls].hospital_id ? 'border-color:rgba(242,193,78,.5); background:rgba(242,193,78,.07)' : 'border-color:var(--gl-hairline)'">
+              <div class="rounded-xl p-3.5 text-sm border flex flex-col gap-1.5 transition"
+                :class="canPickHospital() && ac.ranking?.classes?.[cls] ? 'gl-card-hover cursor-pointer' : ''"
+                @click="canPickHospital() && ac.ranking?.classes?.[cls] && selectHospitalClass(ac.ranking.classes[cls].hospital_id)"
+                :style="ac.ranking?.classes?.[cls] && ac.case?.selected_hospital_id === ac.ranking.classes[cls].hospital_id ? 'border-color:rgba(243,194,78,.55); background:rgba(243,194,78,.08)' : 'border-color:var(--gl-hairline)'">
                 <div class="text-xs font-semibold uppercase tracking-wide" style="color:var(--gl-gold-soft)" x-text="t('console.case.class' + cls[0].toUpperCase() + cls.slice(1))"></div>
                 <template x-if="ac.ranking?.classes?.[cls]">
                   <div class="space-y-1">
-                    <div class="font-medium" x-text="ac.ranking.classes[cls].name"></div>
-                    <span x-show="ac.ranking.classes[cls].scheme_boost_applied" class="text-xs" style="color:var(--gl-gold-soft)" x-text="t('console.case.schemeBoost')"></span>
+                    <div class="gl-section-title" x-text="ac.ranking.classes[cls].name"></div>
+                    <span x-show="ac.ranking.classes[cls].scheme_boost_applied" class="gl-badge gl-badge-gold text-[10px]" x-text="t('console.case.schemeBoost')"></span>
                     <div class="text-xs" style="color:var(--gl-ink-dim)" x-text="hospitalLine(ac.ranking.classes[cls])"></div>
-                    <button x-show="viewRole !== 'family' && !ac.case?.selected_hospital_id"
-                      @click="selectHospitalClass(ac.ranking.classes[cls].hospital_id)" :disabled="loading"
-                      class="gl-btn-primary rounded-md px-2 py-1 text-xs mt-1" x-text="t('console.case.chooseClass')"></button>
+                    <div class="text-xs leading-snug pt-0.5" style="color:var(--gl-ink-faint)" x-text="ac.ranking.classes[cls].reason"></div>
+                    <button x-show="canPickHospital()"
+                      @click.stop="selectHospitalClass(ac.ranking.classes[cls].hospital_id)" :disabled="loading"
+                      class="gl-btn-primary rounded-lg px-2.5 py-1.5 text-xs mt-1.5 w-full" x-text="t('console.case.chooseClass')"></button>
                   </div>
                 </template>
                 <p x-show="!ac.ranking?.classes?.[cls]" class="text-xs" style="color:var(--gl-ink-faint)" x-text="t('console.case.classUnavailable')"></p>
               </div>
             </template>
           </div>
-          <p x-show="ac.ranking && !ac.ranking.ranked.length" class="text-sm text-rose-700 mt-2" x-text="t('console.case.noHospitalMatch')"></p>
+          <p x-show="ac.ranking && !ac.ranking.ranked.length" class="text-sm mt-2" style="color:var(--gl-danger)" x-text="t('console.case.noHospitalMatch')"></p>
         </div>
 
         <!-- step 3: bed lock + route + blood + prep -->
         <template x-if="ac.case?.selected_hospital_id">
           <div class="grid sm:grid-cols-2 gap-4">
             <div class="gl-card p-4 text-sm">
-              <h3 class="font-medium" x-text="t('console.case.bedLockTitle')"></h3>
+              <h3 class="gl-section-title" x-text="t('console.case.bedLockTitle')"></h3>
               <template x-if="ac.bedLock">
                 <p class="mt-1.5" style="color:var(--gl-ink-dim)">
                   <span class="gl-badge gl-badge-emerald" x-text="ac.bedLock.lock_status"></span>
@@ -340,7 +623,7 @@
             </div>
 
             <div class="gl-card p-4 text-sm">
-              <h3 class="font-medium" x-text="t('console.case.routeTitle')"></h3>
+              <h3 class="gl-section-title" x-text="t('console.case.routeTitle')"></h3>
               <template x-if="ac.route">
                 <div class="mt-1">
                   <div class="text-lg font-semibold gl-stat-value" x-text="t('console.unit.eta') + ' ' + ac.route.eta_min_minutes + '–' + ac.route.eta_max_minutes + ' ' + t('console.unit.min')"></div>
@@ -352,7 +635,7 @@
             </div>
 
             <div class="gl-card p-4 text-sm">
-              <h3 class="font-medium" x-text="t('console.case.bloodTitle')"></h3>
+              <h3 class="gl-section-title" x-text="t('console.case.bloodTitle')"></h3>
               <template x-if="ac.blood">
                 <p class="mt-1.5" style="color:var(--gl-ink-dim)" x-text="ac.blood.outcome === 'hospital_stock_ok' ? t('console.case.bloodOk') : t('console.case.bloodHold')"></p>
               </template>
@@ -360,7 +643,7 @@
             </div>
 
             <div class="gl-card p-4 text-sm">
-              <h3 class="font-medium" x-text="t('console.case.prepTitle')"></h3>
+              <h3 class="gl-section-title" x-text="t('console.case.prepTitle')"></h3>
               <ul class="mt-1.5 space-y-1">
                 <template x-for="p in (ac.prep?.confirmed || [])" :key="p.prep_action_id">
                   <li style="color:var(--gl-gold-soft)">✓ <span x-text="p.label"></span></li>
@@ -377,7 +660,7 @@
         <!-- step 4: handoff code + discharge -->
         <template x-if="ac.case?.selected_hospital_id">
           <div class="gl-card p-4 space-y-3">
-            <h3 class="font-medium" x-text="t('console.case.handoffTitle')"></h3>
+            <h3 class="gl-section-title" x-text="t('console.case.handoffTitle')"></h3>
             <template x-if="ac.case.status !== 'ADMITTED' && ac.case.status !== 'DISCHARGED'">
               <div>
                 <button @click="genQr()" :disabled="loading" class="gl-btn-primary rounded-lg px-3 py-1.5 text-sm" x-text="t('console.case.genQr')"></button>
@@ -411,7 +694,7 @@
 
       <!-- ═══════════ FAMILY: SOS ═══════════ -->
       <section x-show="screen === 'sos'" x-transition.opacity.duration.150ms class="space-y-4 max-w-md">
-        <h1 class="text-xl font-semibold" x-text="t('console.sos.title')"></h1>
+        <h1 class="gl-page-title" x-text="t('console.sos.title')"></h1>
         <p class="text-sm" style="color:var(--gl-gold-soft)"><span x-text="t('console.sos.phoneVerified')"></span> <span x-text="session?.phone_number || fam.phone"></span></p>
 
         <template x-if="!familyCaseId && !fam.otpMissing">
@@ -424,7 +707,7 @@
         </template>
 
         <template x-if="fam.otpMissing">
-          <div class="gl-card p-4 text-sm" style="border-color:rgba(245,158,11,.35); color:#92400e">
+          <div class="gl-card p-4 text-sm" style="border-color:rgba(251,191,36,.4); color:var(--gl-warn)">
             <span x-text="t('console.sos.otpExpired')"></span> <a href="../index.html" class="underline" x-text="t('console.sos.signInAgain')"></a> <span x-text="t('console.sos.otpExpiredSuffix')"></span>
           </div>
         </template>
@@ -439,12 +722,12 @@
 
       <!-- ═══════════ HOSPITAL: bed dashboard ═══════════ -->
       <section x-show="screen === 'beds'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold"><span x-text="t('console.beds.title')"></span> <span x-text="hospDash?.name || session?.hospital_id"></span></h1>
+        <h1 class="gl-page-title"><span x-text="t('console.beds.title')"></span> <span x-text="hospDash?.name || session?.hospital_id"></span></h1>
 
         <div class="grid sm:grid-cols-2 gap-4">
           <template x-for="bt in [['general','console.beds.general','total_general_beds','reserved_general_beds','available_general_beds'],['ICU','console.beds.icu','total_icu_beds','reserved_icu_beds','available_icu_beds']]" :key="bt[0]">
             <div class="gl-card p-4">
-              <h3 class="font-medium" x-text="t(bt[1])"></h3>
+              <h3 class="gl-section-title" x-text="t(bt[1])"></h3>
               <div class="mt-2 flex items-baseline gap-2">
                 <span class="text-3xl font-semibold gl-stat-value" x-text="hospDash?.[bt[4]] ?? '—'"></span>
                 <span class="text-sm" style="color:var(--gl-ink-dim)"><span x-text="t('console.unit.freeOf')"></span> <span x-text="hospDash?.[bt[2]] ?? '—'"></span> · <span x-text="hospDash?.[bt[3]] ?? 0"></span> <span x-text="t('console.unit.reserved')"></span></span>
@@ -460,7 +743,7 @@
 
         <div class="gl-card p-4 text-sm space-y-3">
           <div class="flex items-center gap-2">
-            <h3 class="font-medium" x-text="t('console.beds.syncTitle')"></h3>
+            <h3 class="gl-section-title" x-text="t('console.beds.syncTitle')"></h3>
             <span class="gl-badge gl-badge-gold" x-text="syncStatus?.hospital_sync_tier"></span>
             <span class="text-xs" style="color:var(--gl-ink-faint)" x-show="syncStatus?.last_synced_at" x-text="t('console.beds.lastSynced') + ' ' + fmtTime(syncStatus?.last_synced_at)"></span>
           </div>
@@ -489,7 +772,7 @@
 
         <!-- FR-17: room/bed categories beyond general+ICU (purely additive) -->
         <div class="gl-card p-4 text-sm space-y-3">
-          <h3 class="font-medium" x-text="t('console.beds.categories.title')"></h3>
+          <h3 class="gl-section-title" x-text="t('console.beds.categories.title')"></h3>
           <div class="space-y-2">
             <template x-for="cat in bedCategories" :key="cat.bed_category_id">
               <div class="flex items-center gap-2 flex-wrap">
@@ -512,10 +795,10 @@
 
       <!-- ═══════════ HOSPITAL/ADMIN: patient census (FR-18) ═══════════ -->
       <section x-show="screen === 'census'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold" x-text="t('console.census.title')"></h1>
+        <h1 class="gl-page-title" x-text="t('console.census.title')"></h1>
 
         <div x-show="session.hospital_id" class="gl-card p-4 text-sm space-y-3">
-          <h3 class="font-medium" x-text="t('console.census.addTitle')"></h3>
+          <h3 class="gl-section-title" x-text="t('console.census.addTitle')"></h3>
           <div class="flex gap-2 items-center flex-wrap">
             <input x-model="newPatient.full_name" :placeholder="t('console.census.namePlaceholder')" class="gl-input rounded-md px-2 py-1 w-40" />
             <input x-model.number="newPatient.approx_age" type="number" :placeholder="t('console.census.agePlaceholder')" class="gl-input rounded-md px-2 py-1 w-24" />
@@ -546,7 +829,7 @@
           <template x-for="p in census" :key="p.patient_id">
             <div class="gl-card p-3 flex items-center justify-between flex-wrap gap-2">
               <div>
-                <span class="font-medium" x-text="p.full_name"></span>
+                <span class="gl-section-title" x-text="p.full_name"></span>
                 <span class="gl-badge ml-2" :class="statusClass(p.status)" x-text="statusLabel(p.status)"></span>
                 <span class="gl-chip ml-1" x-show="p.patient_type === 'emergency_case'" x-text="t('console.census.emergencyChip')"></span>
                 <span class="text-xs ml-2" style="color:var(--gl-ink-faint)" x-show="!session.hospital_id" x-text="p.hospital_id"></span>
@@ -564,10 +847,10 @@
 
       <!-- ═══════════ HOSPITAL/ADMIN: doctor/staff roster (FR-19) ═══════════ -->
       <section x-show="screen === 'roster'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold" x-text="t('console.roster.title')"></h1>
+        <h1 class="gl-page-title" x-text="t('console.roster.title')"></h1>
 
         <div x-show="session.hospital_id" class="gl-card p-4 text-sm space-y-3">
-          <h3 class="font-medium" x-text="t('console.roster.addTitle')"></h3>
+          <h3 class="gl-section-title" x-text="t('console.roster.addTitle')"></h3>
           <div class="flex gap-2 items-center flex-wrap">
             <input x-model="newStaff.full_name" :placeholder="t('console.census.namePlaceholder')" class="gl-input rounded-md px-2 py-1 w-40" />
             <select x-model="newStaff.staff_category" class="gl-select rounded-md px-2 py-1">
@@ -586,7 +869,7 @@
             <div class="gl-card p-3 space-y-2">
               <div class="flex items-center justify-between flex-wrap gap-2">
                 <div>
-                  <span class="font-medium" x-text="s.full_name"></span>
+                  <span class="gl-section-title" x-text="s.full_name"></span>
                   <span class="gl-chip ml-2" x-text="t('console.staffCategory.' + s.staff_category)"></span>
                   <span class="text-xs ml-1" style="color:var(--gl-ink-faint)" x-show="s.specialty" x-text="s.specialty"></span>
                   <span class="gl-badge ml-2" :class="statusClass(s.on_duty_status)" x-text="statusLabel(s.on_duty_status)"></span>
@@ -626,10 +909,10 @@
 
       <!-- ═══════════ HOSPITAL/ADMIN: medical inventory (FR-21) ═══════════ -->
       <section x-show="screen === 'inventory'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold" x-text="t('console.inventory.title')"></h1>
+        <h1 class="gl-page-title" x-text="t('console.inventory.title')"></h1>
 
         <div x-show="session.hospital_id" class="gl-card p-4 text-sm space-y-3">
-          <h3 class="font-medium" x-text="t('console.inventory.addTitle')"></h3>
+          <h3 class="gl-section-title" x-text="t('console.inventory.addTitle')"></h3>
           <div class="flex gap-2 items-center flex-wrap">
             <input x-model="newInvItem.item_name" :placeholder="t('console.inventory.namePlaceholder')" class="gl-input rounded-md px-2 py-1 w-40" />
             <select x-model="newInvItem.category" class="gl-select rounded-md px-2 py-1">
@@ -648,7 +931,7 @@
           <template x-for="i in inventory" :key="i.item_id">
             <div class="gl-card p-3 flex items-center justify-between flex-wrap gap-2">
               <div>
-                <span class="font-medium" x-text="i.item_name"></span>
+                <span class="gl-section-title" x-text="i.item_name"></span>
                 <span class="gl-chip ml-2" x-text="t('console.invCategory.' + i.category)"></span>
                 <span class="gl-badge ml-2" :class="i.is_low_stock ? 'gl-badge-rose' : 'gl-badge-emerald'" x-text="i.quantity_on_hand + ' ' + i.unit"></span>
                 <span class="gl-badge ml-1 gl-badge-amber" x-show="i.is_low_stock" x-text="t('console.inventory.lowStock')"></span>
@@ -666,7 +949,7 @@
 
       <!-- ═══════════ HOSPITAL: rule-based fuzzy import (FR-22) ═══════════ -->
       <section x-show="screen === 'import'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold" x-text="t('console.import.title')"></h1>
+        <h1 class="gl-page-title" x-text="t('console.import.title')"></h1>
         <p class="text-sm" style="color:var(--gl-ink-dim)" x-text="t('console.import.intro')"></p>
 
         <template x-if="!session.hospital_id">
@@ -698,7 +981,7 @@
 
             <div x-show="importReport" class="gl-card p-4 text-sm space-y-3">
               <div class="flex items-center justify-between">
-                <h3 class="font-medium" x-text="t('console.import.reviewTitle')"></h3>
+                <h3 class="gl-section-title" x-text="t('console.import.reviewTitle')"></h3>
                 <span class="text-xs" style="color:var(--gl-ink-faint)" x-text="importReport?.row_count + ' ' + t('console.import.rowsFound')"></span>
               </div>
               <div class="overflow-x-auto">
@@ -739,7 +1022,7 @@
             <div x-show="importResult" class="gl-card p-4 text-sm space-y-2">
               <div class="">
                 <span x-text="t('console.import.importedCount')"></span>
-                <span class="font-medium" x-text="importResult?.imported"></span>
+                <span class="gl-section-title" x-text="importResult?.imported"></span>
               </div>
               <template x-if="importResult?.skipped?.length">
                 <div class="space-y-1">
@@ -759,27 +1042,23 @@
 
       <!-- ═══════════ HOSPITAL: incoming cases ═══════════ -->
       <section x-show="screen === 'incoming'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold" x-text="t('console.incoming.title')"></h1>
-        <div class="space-y-3">
-          <template x-for="c in cases" :key="c.case_id">
-            <div class="gl-card p-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <span class="font-medium" x-text="c.patient_name || t('console.common.patientUnknown')"></span>
-                  <span class="gl-badge ml-2" :class="statusClass(c.status)" x-text="statusLabel(c.status)"></span>
-                </div>
-                <button @click="openHospCase(c.case_id)" class="gl-link text-sm" x-text="t('console.incoming.manage')"></button>
-              </div>
-            </div>
-          </template>
-          <p x-show="!cases.length" class="text-sm" style="color:var(--gl-ink-faint)" x-text="t('console.incoming.empty')"></p>
+        <div class="flex items-end justify-between flex-wrap gap-2">
+          <h1 class="gl-page-title" x-text="t('console.incoming.title')"></h1>
+          <div class="flex items-center gap-2 text-xs" style="color:var(--gl-ink-dim)">
+            <label class="flex items-center gap-1.5"><input type="checkbox" x-model="incomingShowClosed"> <span x-text="t('console.incoming.showClosed')"></span></label>
+          </div>
         </div>
 
+        <!-- ── the managed case detail — shown FIRST so a click on "Manage" is obvious ── -->
         <template x-if="hc.case">
-          <div class="gl-card p-4 space-y-4" x-transition>
-            <div class="flex items-center justify-between">
-              <h3 class="font-medium" x-text="t('console.incoming.casePrefix') + ' ' + (hc.case.patient_name || t('console.common.unknownPatient'))"></h3>
+          <div class="gl-card p-4 space-y-4" x-ref="hospDetail" x-transition>
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <button @click="hc = {}" class="gl-link text-sm" x-text="t('console.incoming.backToList')"></button>
               <span class="gl-badge" :class="statusClass(hc.case.status)" x-text="statusLabel(hc.case.status)"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <h3 class="gl-section-title" x-text="t('console.incoming.casePrefix') + ' ' + (hc.case.patient_name || t('console.common.unknownPatient'))"></h3>
+              <span class="font-mono text-xs" style="color:var(--gl-ink-faint)" x-text="hc.case.case_id?.slice(0,8)"></span>
             </div>
 
             <div x-show="hc.assessment?.raw_voice_transcript" class="text-sm p-3 rounded-lg" style="background:rgba(242,193,78,.08); border:1px solid rgba(242,193,78,.25)">
@@ -787,7 +1066,7 @@
               <p style="color:var(--gl-ink)" x-text="hc.assessment?.raw_voice_transcript"></p>
             </div>
 
-            <div x-show="hc.notes?.length" class="text-sm p-3 rounded-lg" style="background:rgba(15,23,42,.04)">
+            <div x-show="hc.notes?.length" class="text-sm p-3 rounded-lg" style="background:var(--gl-subtle-bg)">
               <div class="text-xs font-medium mb-1.5" style="color:var(--gl-ink-dim)" x-text="t('console.incoming.updatesLabel')"></div>
               <ul class="space-y-1.5">
                 <template x-for="n in (hc.notes || [])" :key="n.case_note_id">
@@ -826,11 +1105,29 @@
             </div>
           </div>
         </template>
+
+        <!-- ── the list ── -->
+        <div class="space-y-2.5">
+          <template x-for="c in hospIncomingList()" :key="c.case_id">
+            <div class="gl-card p-4 flex items-center justify-between gap-3 flex-wrap"
+                 :style="hc.case && hc.case.case_id === c.case_id ? 'border-color:rgba(243,194,78,.5)' : ''">
+              <div>
+                <span class="gl-section-title" x-text="c.patient_name || t('console.common.patientUnknown')"></span>
+                <span class="gl-badge ml-2" :class="statusClass(c.status)" x-text="statusLabel(c.status)"></span>
+                <span class="text-xs ml-2" style="color:var(--gl-ink-faint)" x-text="t('console.case.pathLabel') + ' ' + c.creation_path"></span>
+              </div>
+              <button @click="openHospCase(c.case_id)"
+                class="gl-btn-secondary rounded-lg px-3 py-1.5 text-xs"
+                x-text="hc.case && hc.case.case_id === c.case_id ? t('console.incoming.managing') : t('console.incoming.manage')"></button>
+            </div>
+          </template>
+          <p x-show="!hospIncomingList().length" class="gl-empty" x-text="t('console.incoming.empty')"></p>
+        </div>
       </section>
 
       <!-- ═══════════ BLOOD BANK: holds ═══════════ -->
       <section x-show="screen === 'holds'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold"><span x-text="t('console.holds.title')"></span><template x-if="session?.blood_bank_id"><span> — <span x-text="session.blood_bank_id"></span></span></template></h1>
+        <h1 class="gl-page-title"><span x-text="t('console.holds.title')"></span><template x-if="session?.blood_bank_id"><span> — <span x-text="session.blood_bank_id"></span></span></template></h1>
         <div class="space-y-3">
           <template x-for="h in holds" :key="h.blood_bank_hold_id">
             <div class="gl-card p-4 text-sm flex items-center justify-between">
@@ -853,7 +1150,7 @@
       <!-- ═══════════ CONTROL ROOM ═══════════ -->
       <section x-show="screen === 'flags'" x-transition.opacity.duration.150ms class="space-y-4">
         <div class="flex items-center justify-between">
-          <h1 class="text-xl font-semibold" x-text="t('console.flags.title')"></h1>
+          <h1 class="gl-page-title" x-text="t('console.flags.title')"></h1>
           <button @click="runScan()" :disabled="loading" class="gl-btn-primary text-sm rounded-lg px-3 py-1.5" x-text="t('console.flags.runScan')"></button>
         </div>
         <p class="text-sm" style="color:var(--gl-ink-dim)" x-text="t('console.flags.description')"></p>
@@ -878,7 +1175,7 @@
       </section>
 
       <section x-show="screen === 'oversight'" x-transition.opacity.duration.150ms class="space-y-6">
-        <h1 class="text-xl font-semibold" x-text="t('console.oversight.title')"></h1>
+        <h1 class="gl-page-title" x-text="t('console.oversight.title')"></h1>
         <div>
           <h3 class="font-medium text-sm mb-2" style="color:var(--gl-ink-dim)" x-text="t('console.oversight.conflictsTitle')"></h3>
           <div class="gl-panel divide-y text-sm" style="--tw-divide-opacity:1; border-color:var(--gl-hairline)">
@@ -913,7 +1210,7 @@
 
       <!-- ═══════════ ADMIN: hospitals ═══════════ -->
       <section x-show="screen === 'hospitals'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold" x-text="t('console.hospitals.title')"></h1>
+        <h1 class="gl-page-title" x-text="t('console.hospitals.title')"></h1>
         <div class="gl-panel overflow-hidden text-sm">
           <table class="gl-table w-full">
             <thead><tr>
@@ -939,14 +1236,14 @@
         </div>
 
         <div class="gl-card p-4 text-sm space-y-2" style="border-color:rgba(244,63,94,.35)">
-          <h3 class="font-medium" x-text="t('console.reset.title')"></h3>
+          <h3 class="gl-section-title" x-text="t('console.reset.title')"></h3>
           <p style="color:var(--gl-ink-dim)" x-text="t('console.reset.note')"></p>
           <template x-if="!resetConfirming">
             <button @click="resetConfirming = true" class="gl-btn-danger rounded-lg px-3 py-1.5" x-text="t('console.reset.button')"></button>
           </template>
           <template x-if="resetConfirming">
             <div class="flex items-center gap-2">
-              <span style="color:#be123c" x-text="t('console.reset.confirmPrompt')"></span>
+              <span style="color:var(--gl-danger)" x-text="t('console.reset.confirmPrompt')"></span>
               <button @click="resetDemoData()" :disabled="loading" class="gl-btn-danger rounded-lg px-3 py-1.5" x-text="t('console.reset.confirmButton')"></button>
               <button @click="resetConfirming = false" class="gl-btn-secondary rounded-lg px-3 py-1.5" x-text="t('console.common.cancel')"></button>
             </div>
@@ -956,7 +1253,7 @@
 
       <!-- ═══════════ ADMIN / CONTROL ROOM: map overview ═══════════ -->
       <section x-show="screen === 'map'" x-transition.opacity.duration.150ms class="space-y-4">
-        <h1 class="text-xl font-semibold" x-text="t('console.map.title')"></h1>
+        <h1 class="gl-page-title" x-text="t('console.map.title')"></h1>
         <div class="flex flex-wrap gap-2 text-xs">
           <span class="gl-chip flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:#f2c14e"></span><span x-text="t('console.map.legendHospital')"></span></span>
           <span class="gl-chip flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:#e11d48"></span><span x-text="t('console.map.legendBlood')"></span></span>
@@ -977,15 +1274,14 @@
   <!-- ─────────────────────────── toasts ─────────────────────────── -->
   <div class="fixed bottom-4 right-4 z-50 space-y-2 w-80">
     <template x-for="t in toasts" :key="t.id">
-      <div x-transition class="rounded-lg p-3 text-sm"
-        :style="t.kind === 'error' ? 'background:#fff1f2; color:#be123c; border:1px solid #fecdd3; border-left:3px solid #be123c; box-shadow:0 4px 14px rgba(190,18,60,.12)'
-          : (t.kind === 'ok' ? 'background:#fdf6ec; color:#7c4a03; border:1px solid #f3c877; border-left:3px solid var(--gl-gold); box-shadow:0 4px 14px rgba(180,83,9,.12)'
-          : 'background:#ffffff; color:var(--gl-ink); border:1px solid var(--gl-hairline); border-left:3px solid #94a3b8; box-shadow:0 4px 14px rgba(15,23,42,.08)')"
+      <div x-transition class="gl-toast"
+        :class="t.kind === 'error' ? 'gl-toast-error' : (t.kind === 'ok' ? 'gl-toast-ok' : '')"
         x-text="t.msg"></div>
     </template>
   </div>
 
   <script src="map.js"></script>
+  <script src="charts.js"></script>
   <script src="console.js"></script>
 </body>
 </html>

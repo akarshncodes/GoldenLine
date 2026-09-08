@@ -30,7 +30,7 @@ document.addEventListener('alpine:init', () => {
 
     // ---- ui ----
     apiUp: true,
-    checkingSession: true,
+    checkingSession: false,   // flips true only while an existing token is being validated
     tab: 'staff',        // 'staff' | 'family'
     forgotOpen: false,
     forgotStep: 1,        // 1 = enter account id, 2 = enter code + new password
@@ -53,10 +53,13 @@ document.addEventListener('alpine:init', () => {
       this.health();
       setInterval(() => this.health(), 20000);
 
-      let saved;
+      let saved, token;
       try { saved = localStorage.getItem(LANG_KEY); } catch { saved = null; }
+      try { token = localStorage.getItem(TOKEN_KEY); } catch { token = null; }
       await this.setLang(saved || (navigator.language || 'en').slice(0, 2));
 
+      // only show the "checking…" spinner if there's actually a token to validate
+      if (token) this.checkingSession = true;
       await this.maybeAutoRedirect();
       this.checkingSession = false;
     },
@@ -68,20 +71,6 @@ document.addEventListener('alpine:init', () => {
 
     t(key) {
       return this.dict[key] || key;
-    },
-
-    // Deterministic pseudo-random layout for the floating background particles
-    // (no Math.random() so the scene doesn't jump on every Alpine re-render).
-    particleStyle(i) {
-      const seed = i * 137.5;
-      const left = seed % 100;
-      const top = (seed * 1.7) % 100;
-      const size = 4 + (i % 5) * 2;
-      const durY = 12 + (i % 6) * 2;
-      const durX = 16 + (i % 5) * 2;
-      const delay = (i % 7) * 0.6;
-      return `left:${left}%; top:${top}%; width:${size}px; height:${size}px; `
-        + `--gl-dur-y:${durY}s; --gl-dur-x:${durX}s; --gl-delay:${delay}s;`;
     },
 
     async setLang(code) {

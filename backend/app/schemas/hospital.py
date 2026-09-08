@@ -91,8 +91,8 @@ class SchemeUpdate(BaseModel):
 class HospitalSelectionRequest(BaseModel):
     """Both paths: the helper explicitly taps one of the 3 cost-class hospitals
     shown for this case (see RankingResponse.classes) — after asking the family
-    inside the ambulance which class they'd like. Never the family, never
-    auto-selected, and never any hospital outside those 3 class picks."""
+    which class they'd like. Never the family directly, never auto-selected,
+    and never any hospital outside those 3 class picks."""
     model_config = ConfigDict(extra="forbid")
 
     hospital_id: str = Field(min_length=1)
