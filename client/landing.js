@@ -6,7 +6,7 @@
  *   · sticky-nav shadow + "already signed in" CTA swap
  *   · footer API health line
  */
-const API = window.GOLDENLINE_API || 'http://localhost:8000';
+const API = 'http://localhost:8000';
 const TOKEN_KEY = 'goldenline.token';
 
 document.addEventListener('DOMContentLoaded', () => {
