@@ -1064,6 +1064,16 @@ document.addEventListener('alpine:init', () => {
         await this.api('POST', `/cases/${this.activeCase}/trigger-discharge`);
         this.toast(this.t('console.toast.discharged'), 'ok');
         await this.refreshCase();
+        // Discharge releases the admitted bed (FR-16) — refresh any bed-count
+        // views already cached in this session (same reason scanQr() below
+        // refreshes after an admission), so the operator doesn't have to
+        // navigate away and back before the freed bed shows up. loadBeds()
+        // also hits a hospital-scoped endpoint a helper isn't allowed to
+        // read, so only call it for roles that can actually see it.
+        if (this.viewRole === 'admin' || this.viewRole === 'hospital' || this.viewRole === 'controlroom') {
+          this.loadBeds().catch(() => {});
+        }
+        if (this.hospitals.length) this.loadHospitals().catch(() => {});
       } catch {}
     },
 
