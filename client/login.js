@@ -5,7 +5,7 @@
  * has no login UI any more — it just reads the token this page writes and
  * auto-detects the account's role.
  */
-const API = 'http://localhost:8000';
+const API = (typeof window !== 'undefined' && window.GOLDENLINE_API) || 'http://localhost:8000';
 const TOKEN_KEY = 'goldenline.token';
 const FAMILY_OTP_KEY = 'goldenline.family.otpId';
 const FAMILY_PHONE_KEY = 'goldenline.family.phone';

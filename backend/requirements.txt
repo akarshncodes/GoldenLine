@@ -10,5 +10,5 @@ python-dotenv>=1.0
 httpx>=0.27          # FR-4: real Google Maps Directions API call
 python-multipart>=0.0.9  # FR-22: CSV file upload (FastAPI's UploadFile)
 
-# --- Optional: uncomment when switching local dev from SQLite to PostgreSQL ---
-# psycopg[binary]>=3.2
+# --- PostgreSQL (Render free DB / production) ---
+psycopg[binary]>=3.2

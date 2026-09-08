@@ -1,5 +1,5 @@
 // Helper app configuration.
-export const API_BASE = 'http://localhost:8000';
+export const API_BASE = (typeof window !== 'undefined' && window.GOLDENLINE_API) || 'http://localhost:8000';
 
 // Demo helper account (FR-11: staff log in with id + password; seeded dev
 // password is "<user_id>.sih2026"). A real build collects these on a login screen.

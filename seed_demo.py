@@ -21,12 +21,31 @@ import random
 import sqlite3
 import sys
 import urllib.error
+import os
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-API = "http://127.0.0.1:8000"
-DB = Path(__file__).parent / "backend" / "dev.db"
+# Local dev hits :8000; a deployment (Render) sets SEED_API to its own $PORT
+# so start.sh can seed the freshly-migrated DB right after uvicorn boots.
+API = os.environ.get("SEED_API", "http://127.0.0.1:8000")
+
+
+def _sqlite_path() -> Path | None:
+    """The on-disk SQLite file, from DATABASE_URL (sqlite:///...) or the
+    local-dev default backend/dev.db. None when DATABASE_URL points at a
+    non-SQLite database (e.g. Postgres in production) — there's no local
+    file to check or backdate directly in that case."""
+    url = os.environ.get("DATABASE_URL", "")
+    if url and not url.startswith("sqlite:///"):
+        return None
+    if url.startswith("sqlite:///"):
+        p = Path(url.replace("sqlite:///", "", 1))
+        return p if p.is_absolute() else (Path.cwd() / p)
+    return Path(__file__).parent / "backend" / "dev.db"
+
+
+DB = _sqlite_path()
 DEMO_PW = ".sih2026"
 random.seed(20260907)
 
@@ -94,10 +113,10 @@ def login(user_id: str) -> str | None:
 
 
 def main() -> None:
-    if not DB.exists():
+    if DB is not None and not DB.exists():
         sys.exit(f"dev.db not found at {DB} — migrate first")
     if "_error" in _req("GET", "/health"):
-        sys.exit("backend not reachable on :8000")
+        sys.exit(f"backend not reachable at {API}")
 
     admin = login("admin")
     helpers = {h: login(h) for h in ("HLP-001", "HLP-002", "HLP-003", "HLP-004", "HLP-005")}
@@ -105,6 +124,15 @@ def main() -> None:
     receps = {r: login(r) for r in ("recep-hosp-001", "recep-hosp-004", "recep-hosp-007")}
     receps = {k: v for k, v in receps.items() if v}
     print(f"logged in: admin={bool(admin)} helpers={list(helpers)} receps={list(receps)}")
+
+    # Idempotency guard: start.sh may re-run this on every boot (Render's free
+    # tier restarts the service after it spins down from inactivity). Only
+    # seed a genuinely empty database — never pile duplicate demo data onto a
+    # deployment that's already been seeded.
+    existing_cases = _req("GET", "/cases", token=admin)
+    if isinstance(existing_cases, list) and len(existing_cases) > 0:
+        print(f"already seeded ({len(existing_cases)} cases exist) — skipping.")
+        return
 
     hospitals = _req("GET", "/hospitals", token=admin)
     hosp_ids = [h["hospital_id"] for h in hospitals][:12]
@@ -216,19 +244,44 @@ def main() -> None:
     print(f"control-room scan: {scan.get('total', scan)}")
 
     # ---- backdate created_at so charts span 14 days ----
-    con = sqlite3.connect(DB)
-    cur = con.cursor()
-    rows = cur.execute("SELECT case_id FROM cases ORDER BY created_at").fetchall()
-    now = datetime.now(timezone.utc)
-    for idx, (cid,) in enumerate(rows):
-        days_ago = 14 - int(idx / max(1, len(rows)) * 14)
-        ts = (now - timedelta(days=days_ago, hours=random.randint(0, 20),
-                              minutes=random.randint(0, 59))).strftime("%Y-%m-%d %H:%M:%S")
-        cur.execute("UPDATE cases SET created_at = ? WHERE case_id = ?", (ts, cid))
-    con.commit()
-    con.close()
-    print(f"backdated {len(rows)} cases across ~14 days")
+    _backdate_cases()
     print("\ndone — reload the console dashboards.")
+
+
+def _backdate_cases() -> None:
+    """Spread cases.created_at across the last 14 days directly in the DB
+    (the HTTP API has no field for setting creation time). SQLite locally
+    (stdlib, no extra dependency); Postgres in production via psycopg, which
+    is only imported here — it's a production-only dependency, not installed
+    for a plain local `python3 seed_demo.py` run."""
+    now = datetime.now(timezone.utc)
+
+    if DB is not None:
+        con = sqlite3.connect(DB)
+        cur = con.cursor()
+        rows = cur.execute("SELECT case_id FROM cases ORDER BY created_at").fetchall()
+        for idx, (cid,) in enumerate(rows):
+            days_ago = 14 - int(idx / max(1, len(rows)) * 14)
+            ts = (now - timedelta(days=days_ago, hours=random.randint(0, 20),
+                                  minutes=random.randint(0, 59))).strftime("%Y-%m-%d %H:%M:%S")
+            cur.execute("UPDATE cases SET created_at = ? WHERE case_id = ?", (ts, cid))
+        con.commit()
+        con.close()
+        print(f"backdated {len(rows)} cases across ~14 days (sqlite)")
+        return
+
+    import psycopg
+    with psycopg.connect(os.environ["DATABASE_URL"]) as con:
+        with con.cursor() as cur:
+            cur.execute("SELECT case_id FROM cases ORDER BY created_at")
+            rows = cur.fetchall()
+            for idx, (cid,) in enumerate(rows):
+                days_ago = 14 - int(idx / max(1, len(rows)) * 14)
+                ts = now - timedelta(days=days_ago, hours=random.randint(0, 20),
+                                      minutes=random.randint(0, 59))
+                cur.execute("UPDATE cases SET created_at = %s WHERE case_id = %s", (ts, cid))
+        con.commit()
+    print(f"backdated {len(rows)} cases across ~14 days (postgres)")
 
 
 if __name__ == "__main__":

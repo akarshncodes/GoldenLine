@@ -4,7 +4,7 @@
  * GET /track/{token} returns, nothing more. See backend/app/schemas/tracking.py
  * for the whitelist this is built against.
  */
-const API = 'http://localhost:8000';
+const API = (typeof window !== 'undefined' && window.GOLDENLINE_API) || 'http://localhost:8000';
 const POLL_MS = 8000;
 
 document.addEventListener('alpine:init', () => {

@@ -1,0 +1,57 @@
+# render.yaml — GoldenLine Blueprint
+# Defines both services so Render creates them together with one click.
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # ─── 1. FastAPI backend ──────────────────────────────────────────────────────
+  - type: web
+    name: goldenline-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash start.sh
+    healthCheckPath: /health
+    envVars:
+      - key: APP_NAME
+        value: GoldenLine
+      - key: ENV
+        value: production
+      - key: FORCE_HTTPS
+        value: "true"
+      - key: SEED_DEMO
+        value: "true"            # seed demo accounts on first boot (idempotent)
+      - key: AUTH_SECRET
+        generateValue: true      # Render auto-generates a secure random secret
+      - key: DATABASE_URL
+        fromDatabase:
+          name: goldenline-db
+          property: connectionString
+
+  # ─── 2. Vanilla JS frontend (Static Site) ────────────────────────────────────
+  - type: web
+    name: goldenline-client
+    runtime: static
+    rootDir: client
+    plan: free
+    # Overwrite the checked-in client/config.js placeholder with the real
+    # backend URL at build time — every page loads config.js before its own
+    # scripts and reads window.GOLDENLINE_API from it (see client/config.js).
+    buildCommand: |
+      echo "window.GOLDENLINE_API = 'https://goldenline-api.onrender.com';" > config.js
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# ─── PostgreSQL database ──────────────────────────────────────────────────────
+databases:
+  - name: goldenline-db
+    databaseName: goldenline
+    user: goldenline
+    plan: free              # 90-day free trial, 1 GB storage
