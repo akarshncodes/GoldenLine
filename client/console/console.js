@@ -4,7 +4,7 @@
  * Talks to the FastAPI backend on :8000. Every failed request surfaces a toast —
  * nothing fails silently.
  */
-const API = 'http://localhost:8000';
+const API = window.GOLDENLINE_API || 'http://localhost:8000';
 const TOKEN_KEY = 'goldenline.token';
 const FAMILY_OTP_KEY = 'goldenline.family.otpId';
 const FAMILY_PHONE_KEY = 'goldenline.family.phone';
