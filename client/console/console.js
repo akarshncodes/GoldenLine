@@ -1041,6 +1041,27 @@ document.addEventListener('alpine:init', () => {
         await this.refreshCase();
       } catch {}
     },
+    // A case can get stuck holding a reserved bed forever if it's selected
+    // but the ambulance never actually arrives to be admitted (abandoned,
+    // patient self-transported instead, etc.) — this frees that bed and
+    // clears the selection so the helper can pick again, or leave it closed.
+    canReleaseHospital() {
+      return !!(this.ac.case?.selected_hospital_id
+        && !['ADMITTED', 'DISCHARGED'].includes(this.ac.case?.status)
+        && (this.viewRole === 'helper' || this.viewRole === 'admin'));
+    },
+    async releaseHospitalSelection() {
+      if (!this.canReleaseHospital()) return;
+      try {
+        await this.api('POST', `/cases/${this.activeCase}/bed-lock/release`);
+        this.toast(this.t('console.toast.bedReleased'), 'ok');
+        await this.refreshCase();
+        if (this.viewRole === 'admin' || this.viewRole === 'hospital' || this.viewRole === 'controlroom') {
+          this.loadBeds().catch(() => {});
+        }
+        if (this.hospitals.length) this.loadHospitals().catch(() => {});
+      } catch {}
+    },
 
     deviate() {
       // FR-15: never blocks — just widen the ETA range slightly and note it.

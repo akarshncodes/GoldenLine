@@ -14,6 +14,7 @@ from app.schemas.bed_lock import (
 )
 from app.services import bed_lock as svc
 from app.services import hospitals as hospitals_svc
+from app.services.access import require_case_access
 from app.services.auth_deps import get_principal, require_role
 from app.services.security import Principal
 
@@ -73,12 +74,22 @@ def get_case_bed_lock(case_id: str, db: Session = Depends(get_db)) -> BedLockOut
 
 
 @router.post("/cases/{case_id}/bed-lock/release", response_model=ReleaseResponse)
-def release_case_bed_lock(case_id: str, db: Session = Depends(get_db)) -> ReleaseResponse:
+def release_case_bed_lock(
+    case_id: str,
+    principal: Principal = Depends(require_role(Role.helper)),
+    db: Session = Depends(get_db),
+) -> ReleaseResponse:
     """Release the case's bed (cancelled / reassigned). The bed frees up immediately,
-    and the case's hospital selection is cleared so it can be re-selected (FR-3 item 4)."""
+    and the case's hospital selection is cleared so it can be re-selected (FR-3 item 4).
+
+    Helper-only (admin/control_room pass via is_privileged) — same as the
+    selection endpoints this undoes. A case genuinely stuck OPEN with a
+    hospital selected but never admitted (ambulance never arrived, case
+    abandoned) would otherwise hold that bed reserved forever."""
     case = db.get(Case, case_id)
     if case is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"case '{case_id}' does not exist")
+    require_case_access(db, principal, case)
     try:
         released = svc.release_lock(db, case_id)
     except svc.NoActiveLock:

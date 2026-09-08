@@ -620,6 +620,8 @@
                 </p>
               </template>
               <p x-show="!ac.bedLock" class="mt-1.5" style="color:var(--gl-ink-faint)" x-text="t('console.case.bedReleased')"></p>
+              <button x-show="canReleaseHospital()" @click="releaseHospitalSelection()" :disabled="loading"
+                class="gl-btn-secondary rounded-lg px-2.5 py-1.5 text-xs mt-2" x-text="t('console.case.releaseBed')"></button>
             </div>
 
             <div class="gl-card p-4 text-sm">
