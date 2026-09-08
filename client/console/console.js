@@ -1436,7 +1436,21 @@ document.addEventListener('alpine:init', () => {
 
     // ─────────────────────────── admin: hospitals ───────────────────────────
     async loadHospitals() {
-      try { this.hospitals = await this.api('GET', '/hospitals'); } catch { this.hospitals = []; }
+      try {
+        const [hospitals, dash] = await Promise.all([
+          this.api('GET', '/hospitals'),
+          this.api('GET', '/hospitals/dashboard', null, { quiet: true }).catch(() => []),
+        ]);
+        // The plain hospital record's bed_count_by_type is the fixed TOTAL
+        // capacity — it only changes on a real admission/discharge. This
+        // screen should show what's actually free right now, so merge in
+        // the FR-3 dashboard's active-lock-aware numbers (same figures the
+        // Overview KPIs and ranking cards already use): a bed goes "reserved"
+        // the instant a helper selects the hospital, not when the
+        // receptionist later admits the patient.
+        const byId = new Map(dash.map(d => [d.hospital_id, d]));
+        this.hospitals = hospitals.map(h => ({ ...h, _avail: byId.get(h.hospital_id) || null }));
+      } catch { this.hospitals = []; }
     },
     async setTier(hid, tier) {
       try {

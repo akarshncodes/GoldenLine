@@ -1227,7 +1227,7 @@
                       </template>
                     </select>
                   </td>
-                  <td class="px-3 py-2.5" style="color:var(--gl-ink)" x-text="h.bed_count_by_type.general + ' / ' + h.bed_count_by_type.ICU"></td>
+                  <td class="px-3 py-2.5" style="color:var(--gl-ink)" x-text="h._avail ? (h._avail.available_general_beds + ' / ' + h._avail.available_icu_beds) : (h.bed_count_by_type.general + ' / ' + h.bed_count_by_type.ICU)"></td>
                   <td class="px-3 py-2.5" style="color:var(--gl-ink-dim)" x-text="h.cost_tier"></td>
                 </tr>
               </template>
