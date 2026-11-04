@@ -1047,6 +1047,8 @@
         <div class="flex items-end justify-between flex-wrap gap-2">
           <h1 class="gl-page-title" x-text="t('console.incoming.title')"></h1>
           <div class="flex items-center gap-2 text-xs" style="color:var(--gl-ink-dim)">
+            <span x-show="hospIncomingHiddenCount()" style="color:var(--gl-ink-faint)"
+              x-text="t('console.incoming.hiddenHint').replace('{count}', hospIncomingHiddenCount())"></span>
             <label class="flex items-center gap-1.5"><input type="checkbox" x-model="incomingShowClosed"> <span x-text="t('console.incoming.showClosed')"></span></label>
           </div>
         </div>

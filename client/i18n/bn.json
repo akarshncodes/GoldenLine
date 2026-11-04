@@ -299,6 +299,7 @@
   "console.staffCategory.support": "সহায়ক স্টাফ",
   "console.staffCategory.admin_staff": "প্রশাসনিক স্টাফ",
   "console.incoming.title": "আগত কেস",
+  "console.incoming.hiddenHint": "{count} ভর্তি/ডিসচার্জ লুকানো (এখনও \"সংরক্ষিত\" বেডে গণনা করা হয়)",
   "console.incoming.manage": "পরিচালনা করুন →",
   "console.incoming.empty": "এখনও আপনার হাসপাতালে কোনো কেস আসেনি।",
   "console.incoming.casePrefix": "কেস:",

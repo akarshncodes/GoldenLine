@@ -1381,6 +1381,14 @@ document.addEventListener('alpine:init', () => {
         return new Date(b.created_at || 0) - new Date(a.created_at || 0);
       });
     },
+    // The "reserved beds" figure on the Bed capacity screen counts admitted
+    // patients too, but this list hides them by default — without this hint
+    // that reads like beds are reserved for nobody visible on screen.
+    hospIncomingHiddenCount() {
+      if (this.incomingShowClosed) return 0;
+      const closed = new Set(['ADMITTED', 'DISCHARGED']);
+      return (this.cases || []).filter(c => closed.has(c.status)).length;
+    },
     async openHospCase(id, { keepAdmit = false } = {}) {
       const wasAdmit = keepAdmit && this.hc.admitOk;
       this.hc = { admitOk: wasAdmit };

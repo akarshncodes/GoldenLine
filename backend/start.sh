@@ -10,6 +10,11 @@ cd "$(dirname "$0")"
 echo "==> Applying database migrations..."
 alembic upgrade head
 
+if [ "${SEED_DEMO:-true}" = "true" ]; then
+  echo "==> Seeding rich per-hospital demo data (all hospitals, ~50% bed/staff/inventory fill — idempotent)..."
+  python seed_demo_richness.py || echo "Richness seed skipped or failed (non-fatal)."
+fi
+
 PORT="${PORT:-${API_PORT:-8000}}"
 echo "==> Starting GoldenLine API on port $PORT ..."
 uvicorn app.main:app --host 0.0.0.0 --port "$PORT" &

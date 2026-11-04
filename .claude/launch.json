@@ -4,13 +4,13 @@
     {
       "name": "backend",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["/Users/akarshn/Desktop/SIH /Software/Project/backend/demo-server.sh"],
+      "runtimeArgs": ["./backend/demo-server.sh"],
       "port": 8000
     },
     {
       "name": "helper-app",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["/Users/akarshn/Desktop/SIH /Software/Project/client/demo-server.sh"],
+      "runtimeArgs": ["./client/demo-server.sh"],
       "port": 5180
     }
   ]

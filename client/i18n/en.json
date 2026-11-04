@@ -299,6 +299,7 @@
   "console.staffCategory.support": "Support staff",
   "console.staffCategory.admin_staff": "Admin staff",
   "console.incoming.title": "Incoming cases",
+  "console.incoming.hiddenHint": "{count} admitted/discharged hidden (still counted in \"reserved\" beds)",
   "console.incoming.manage": "manage →",
   "console.incoming.empty": "No cases routed to your hospital yet.",
   "console.incoming.casePrefix": "Case:",

@@ -299,6 +299,7 @@
   "console.staffCategory.support": "सहायक स्टाफ",
   "console.staffCategory.admin_staff": "प्रशासनिक स्टाफ",
   "console.incoming.title": "आने वाले केस",
+  "console.incoming.hiddenHint": "{count} भर्ती/डिस्चार्ज छिपे हुए (फिर भी \"आरक्षित\" बिस्तरों में गिने जाते हैं)",
   "console.incoming.manage": "प्रबंधित करें →",
   "console.incoming.empty": "अभी तक आपके अस्पताल को कोई केस नहीं भेजा गया।",
   "console.incoming.casePrefix": "केस:",

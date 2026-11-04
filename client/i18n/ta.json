@@ -299,6 +299,7 @@
   "console.staffCategory.support": "உதவி பணியாளர்",
   "console.staffCategory.admin_staff": "நிர்வாக பணியாளர்",
   "console.incoming.title": "வரும் வழக்குகள்",
+  "console.incoming.hiddenHint": "{count} சேர்க்கப்பட்ட/டிஸ்சார்ஜ் மறைக்கப்பட்டவை (\"இருப்பு\" படுக்கைகளில் இன்னும் கணக்கிடப்படுகின்றன)",
   "console.incoming.manage": "நிர்வகி →",
   "console.incoming.empty": "இதுவரை உங்கள் மருத்துவமனைக்கு வழக்குகள் எதுவும் அனுப்பப்படவில்லை.",
   "console.incoming.casePrefix": "வழக்கு:",
