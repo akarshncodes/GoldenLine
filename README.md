@@ -1,5 +1,7 @@
 # GoldenLine — Real-Time Emergency Capacity Coordination Platform (SIH 2026)
 
+**Smart India Hackathon 2026 · SIH26198 · Team Starks** · [Live demo](https://golden-line-tawny.vercel.app) · 175 backend tests · 4 languages
+
 **GoldenLine** — *the golden thread between every emergency and the right bed* —
 helps families and hospitals coordinate scarce emergency capacity in real time:
 password login for staff (PBKDF2-hashed, with a real forgot-password flow) and
@@ -1291,3 +1293,11 @@ the console:
 Remaining prototype scope (per FRP Section 9 / 10): a production deployment swaps
 the hand-rolled JWT/PBKDF2 for a vetted IdP, and `family` accounts still use phone
 OTP rather than a password (by design).
+
+---
+
+## Author
+
+Built by **Akarsh N** (team captain, Team Starks), B.E. Computer Science and Engineering at PSNA College of Engineering and Technology, using AI-assisted development (Claude Code).
+
+[Portfolio](https://akarshncodes.github.io) · [LinkedIn](https://www.linkedin.com/in/akarsh-n-864794416/) · akarshn.codes@gmail.com
