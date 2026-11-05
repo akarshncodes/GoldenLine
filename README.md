@@ -1300,4 +1300,4 @@ OTP rather than a password (by design).
 
 Built by **Akarsh N** (team captain, Team Starks), B.E. Computer Science and Engineering at PSNA College of Engineering and Technology, using AI-assisted development (Claude Code).
 
-[Portfolio](https://akarshncodes.github.io) · [LinkedIn](https://www.linkedin.com/in/akarsh-n-864794416/) · akarshn.codes@gmail.com
+[Portfolio](https://akarshncodes.github.io) · [LinkedIn](https://www.linkedin.com/in/akarshncodes/) · akarshn.codes@gmail.com
